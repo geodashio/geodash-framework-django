@@ -1,0 +1,48 @@
+{% load geodash_tags %}
+<div
+  id="geodash-map-legend"
+  class="geodash-map-legend geodash-controller"
+  ng-controller="geodash-map-legend">
+  <div class="geodash-map-legend-label">
+    <a
+      class="btn btn-lg btn-primary"
+      style="border:0;"
+      title="Legend"
+      data-target="#geodash-map-legend-container"
+      data-toggle="collapse">{{ legend_title }}</a>
+  </div>
+  <div id="geodash-map-legend-container" class="geodash-map-legend-container collapse" style="">
+    <div geodash-legend-featurelayers></div>
+    <hr>
+    <div geodash-legend-baselayers></div>
+  </div>
+  <div class="geodash-legend-modals">
+    <div
+      id="geodash-modal-layer-more"
+      class="geodash-controller geodash-controller-modal geodash-modal modal fade geodash-layer-more"
+      geodash-controller="geodash-modal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="myModalLabel">
+      <div geodash-modal-layer-more id="geodash-layer-more"></div>
+    </div>
+    <div
+      id="geodash-modal-layer-carto"
+      class="geodash-controller geodash-controller-modal geodash-modal modal fade"
+      geodash-controller="geodash-modal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="myModalLabel">
+      <div geodash-modal-layer-carto id="geodash-layer-carto"></div>
+    </div>
+    <div
+      id="geodash-modal-layer-config"
+      class="geodash-controller geodash-controller-modal geodash-modal modal fade"
+      geodash-controller="geodash-modal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="myModalLabel">
+      <div geodash-modal-layer-config id="geodash-layer-config"></div>
+    </div>
+  </div>
+</div>

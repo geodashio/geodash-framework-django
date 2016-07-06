@@ -1,0 +1,84 @@
+{% block title %}
+title: Map
+{% endblock %}
+{% block about %}
+about:
+{% endblock %}
+{% block welcome %}
+welcome:
+{% endblock %}
+{% block legend %}
+legend:
+  title: "Legend - Click to Open"
+{% endblock %}
+{% block download %}
+download:
+{% endblock %}
+{% block description %}
+description: ""
+{% endblock %}
+{% block slug %}
+slug: ""
+{% endblock %}
+{% block pages %}
+pages: []
+{% endblock %}
+{% block view %}
+view:
+  baselayer: "osm"
+  latitude: 0
+  longitude: 0
+  zoom: 3
+  minZoom: 0
+  maxZoom: 18
+{% endblock %}
+{% block overlays %}
+overlays: []
+{% endblock %}
+{% block baselayers %}
+baselayers:
+  - id: "osm"
+    title: "OpenStreetMap"
+    description: "OpenStreetMap Basemap, Standard Style"
+    source:
+      name: "OpenStreetMap"
+      attribution: "&copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a>"
+      url: "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+    legend:
+      label: "OpenStreetMap"
+  - id: "osm_humanitarian"
+    title: OpenStreetMap / Humanitarian
+    description: "OpenStreetMap Basemap, Humanitarian Style"
+    source:
+      name: "OpenStreetMap"
+      attribution: "&copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a>"
+      url: "http://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png"
+    legend:
+      label: "OpenStreetMap / Humanitarian"
+baselayer: osm
+{% endblock %}
+{% block featurelayers %}
+featurelayers: []
+{% endblock %}
+{% block legendlayers %}
+legendlayers:
+  - osm
+  - osm_humanitarian
+{% endblock %}
+{% block renderlayers %}
+renderlayers:
+  - osm
+  - osm_humanitarian
+{% endblock %}
+{% block charts %}
+charts: []
+{% endblock %}
+{% block controls %}
+controls:
+  attribution: true
+  calendar: false
+  filters: false
+  legend: false
+  sidebar: false
+  zoom: true
+{% endblock %}

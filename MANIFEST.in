@@ -1,0 +1,8 @@
+include README.*
+include LICENSE
+include setup.py
+include setup.cfg
+global-exclude *.pyc
+global-exclude *.pyo
+recursive-include geodash/static *
+recursive-include geodash/templates *

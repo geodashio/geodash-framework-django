@@ -1,0 +1,69 @@
+{% extends "geodash/base.html" %}
+{% load geodash_tags %}
+{% block extra_head %}
+  {% block map_config %}
+  <script type="text/javascript" language="Javascript">
+    geodash.map_config = {{ map_config_json|safe }};
+  </script>
+  {% endblock %}
+  {% block initial_state %}
+  <script type="text/javascript" language="Javascript">
+    geodash.initial_state = {{ state_json|safe }};
+    geodash.state_schema = {{ state_schema_json|safe }};
+  </script>
+  {% endblock %}
+  {% block initial_data %}
+  <script type="text/javascript" language="Javascript">
+      geodash.initial_data = {"data":{}};
+  </script>
+  {% endblock %}
+{% endblock %}
+
+{% block init %}
+<script type="text/javascript" language="Javascript">
+    $(function(){
+        geodash.{{ init_function | default_if_none:"init_explore" }}("mainApp");
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    {% block header %}{% endblock %}
+    <div
+      id="geodash-main"
+      class="row geodash-row geodash-main geodash-controller"
+      ng-controller="geodash-main"
+      data-controller-name="geodash-main"
+      data-controller-type="geodash-main">
+      {% block sidebar_left %}{% endblock %}
+      <div
+        id="geodash-map"
+        class="row geodash-row geodash-map geodash-controller{% if user.is_authenticated %} sidebar-open sidebar-right-open{% endif %}"
+        ng-controller="geodash-map"
+        data-controller-name="geodash-map"
+        data-controller-type="geodash-map">
+        {% block map_controllers %}
+        {% include "geodash/_includes/map_legend.html" with legend_title="Legend - Click to Open" %}
+        {% include "geodash/_includes/map_overlays.html" %}
+        {% endblock %}
+        <div id="map"
+          class="geodash-controller geodash-map-map"
+          ng-controller="geodash-map-map"
+          data-controller-name="geodash-map-map"
+          data-controller-type="geodash-map-map">
+        </div>
+      </div>
+      {% block sidebar_right %}{% endblock %}
+      {% block modals %}
+      <div id="geodash-modals">
+      {% include "geodash/_includes/modals/about.html" %}
+      {% include "geodash/_includes/modals/download.html" %}
+      {% include "geodash/_includes/modals/config.html" %}
+      </div>
+      {% endblock %}
+    </div>
+    {% block footer %}{% endblock %}
+</div>
+{% block extra_content %}{% endblock %}
+{% endblock %}

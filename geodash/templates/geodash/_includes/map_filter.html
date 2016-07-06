@@ -1,0 +1,29 @@
+{% load geodash_tags %}
+<div
+  class="geodash-map-filter geodash-controller"
+  ng-controller="geodash-map-filter"
+  data-controller-name="geodash-map-filter"
+  data-controller-type="geodash-map-filter">
+  <div class="geodash-map-filter-label">
+    <a
+      class="btn btn-lg btn-primary"
+      style="border:0;"
+      title="Filter Data"
+      data-target="#geodash-map-filter-container"
+      data-toggle="collapse">Filter Data - Click to Open</a>
+  </div>
+  <div geodash-filter-container></div>
+  <div class="geodash-filter-modals">
+    <div
+      id="geodash-modal-filter-more"
+      class="geodash-controller geodash-controller-modal geodash-modal modal fade geodash-filter-more"
+      ng-controller="geodash-modal-filter-more"
+      data-controller-name="geodash-modal-filter-more"
+      data-controller-type="geodash-modal-filter-more"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="myModalLabel">
+      <div geodash-modal-filter-more id="geodash-filter-more"></div>
+    </div>
+  </div>
+</div>

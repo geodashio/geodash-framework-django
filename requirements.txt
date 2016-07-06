@@ -1,0 +1,6 @@
+httplib2
+django
+pyyaml
+django-autocomplete-light==2.3.3
+bleach
+markdown

@@ -1,0 +1,477 @@
+{% block title %}
+title:
+  type: markdown
+  label: Title
+  placeholder: Title
+  required: true
+  description: "The title of your dashboard."
+{% endblock %}
+{% block slug %}
+slug:
+  type: text
+  label: Slug
+  placeholder: Slug
+  required: true
+  description: "The url for the dasboard such as http://geodash.io/dashboard/<slug>."
+{% endblock %}
+{% block description %}
+description:
+  type: markdown
+  label: Description
+  placeholder: Description
+  multiline: true
+  required: true
+  description: "The generic description for the dashboard.  This is mostly used internally.  Use about or welcome for user descriptions."
+{% endblock %}
+{% block about %}
+about:
+  title:
+    type: markdown
+    label: Title
+    placeholder: Title
+    multiline: false
+    required: true
+    description: "The title for the about modal."
+{% endblock %}
+{% block welcome %}
+welcome:
+  title:
+    type: markdown
+    label: Title
+    placeholder: Title
+    multiline: false
+    required: true
+    description: "The title for the welcome modal."
+  intro:
+    type: markdown
+    label: Introduction
+    placeholder: Introduction
+    multiline: true
+    required: true
+    description: "The text (in markdown) for the default intro tab of the welcome modal."
+  about:
+    type: markdown
+    label: About
+    placeholder: About
+    multiline: true
+    required: true
+    description: "The text (in markdown) for the about tab of the welcome modal."
+{% endblock %}
+{% block legend %}
+legend:
+  title:
+    type: markdown
+    label: Title
+    placeholder: "Legend - Click to Open"
+    multiline: false
+    required: false
+    description: "The text shown when the Legend is collapsed."
+  background:
+    type: text
+    label: Title
+    placeholder: "Legend - Click to Open"
+    required: false
+    description: "The color of the legend."
+legendlayers:
+  type: stringarray
+  label: Layers
+  placeholder: "Legend Layers"
+  required: false
+  description: "The layers in-order to show in the legend."
+{% endblock %}
+{% block download %}
+download:
+{% endblock %}
+{% block view %}
+view:
+  baselayer:
+    type: text
+    label: Default Base Layer
+    placeholder: osm
+    required: true
+    description: "The default base layer shown on page load."
+  latitude:
+    order: 0
+    type: int
+    label: Latitude
+    placeholder: Latitude
+    description: "The default latitude when opening the dashboard."
+  longitude:
+    order: 1
+    type: int
+    label: Longitude
+    placeholder: Longitude
+    description: "The default longitude when opening the dashboard."
+  zoom:
+    order: 2
+    type: int
+    label: Zoom
+    placeholder: Zoom
+    minValue: 0
+    maxValue: 18
+    description: "The default zoom when opening the dashboard."
+  minZoom:
+    order: 3
+    type: int
+    label: Minimum Zoom
+    placeholder: Minimum Zoom
+    minValue: 0
+    maxValue: 18
+    description: "The minimum a user can zoom out."
+  maxZoom:
+    order: 4
+    type: int
+    label: Maximum Zoom
+    placeholder: Maximum Zoom
+    minValue: 0
+    maxValue: 18
+    description: "The maximum a user can zoom in."
+renderlayers:
+  type: stringarray
+  label: Render Layers
+  placeholder: "Render Layers"
+  required: true
+  description: "The layers in stack order to render; the first is on top; the last is on the bottom."
+{% endblock %}
+{% block controls %}
+controls:
+  attribution:
+    order: 0
+    type: boolean
+    label: Attribution
+  calendar:
+    order: 1
+    type: boolean
+    label: Calendar
+  filters:
+    order: 2
+    type: boolean
+    label: Filters
+  legend:
+    order: 3
+    type: boolean
+    label: Legend
+  sidebar:
+    order: 4
+    type: boolean
+    label: Sidebar
+  zoom:
+    order: 5
+    type: boolean
+    label: Zoom
+{% endblock %}
+{% block overlays %}
+overlays:
+  type: objectarray
+  label: Static Overlays
+  placeholder: "Static Overlays"
+  required: true
+  description: "Static Overlays available."
+  schema:
+    verbose_singular: Static Overlay
+    verbose_plurl: Static Overlays
+    fields:
+      - id: id
+        type: text
+        label: ID
+        placeholder: ID
+        required: true
+        description: "The id of your static overlay."
+      - id: type
+        type: text
+        label: Type
+        placeholder: text or image
+        required: true
+        description: "The type of your static overlay (text or image)."
+        options:
+          - text
+          - image
+      - id: position.top
+        type: text
+        label: Top
+        placeholder: auto
+        required: true
+        description: "The top position of your static overlayer (in pixels or percentage)."
+      - id: position.bottom
+        type: text
+        label: Bottom
+        placeholder: auto
+        required: true
+        description: "The bottom position of your static overlayer (in pixels or percentage)."
+      - id: position.left
+        type: text
+        label: Left
+        placeholder: auto
+        required: true
+        description: "The left position of your static overlayer (in pixels or percentage)."
+      - id: position.right
+        type: text
+        label: Right
+        placeholder: auto
+        required: true
+        description: "The right position of your static overlayer (in pixels or percentage)."
+      - id: width
+        type: text
+        label: Width
+        placeholder: width
+        required: true
+        description: "The width of your static overlayer (in pixels or percentage)."
+      - id: height
+        type: text
+        label: Height
+        placeholder: height
+        required: true
+        description: "The height of your static overlayer (in pixels or percentage)."
+      - id: padding
+        type: text
+        label: Padding
+        placeholder: 0px 0px 0px 0px;
+        required: false
+        description: "The padding to apply to your static overlayer."
+      - id: background
+        type: text
+        label: Background
+        placeholder: transparent;
+        required: false
+        description: "The background to apply to your static overlayer."
+      - id: opacity
+        type: text
+        label: Opacity
+        placeholder: transparent;
+        required: false
+        description: "The opacity to apply to your static overlayer."
+      - id: text.content
+        type: text
+        label: Text Content
+        placeholder: text
+        required: false
+        description: "The text of your static overlayer."
+        when:
+          field: type
+          values:
+            - text
+      - id: text.font.family
+        type: text
+        label: Text Font Family
+        placeholder: Arial
+        required: false
+        description: "The font family of your text in your static overlayer."
+        options:
+          - Arial
+          - Open Sans
+          - Verdana
+          - Impact
+        when:
+          field: type
+          values:
+            - text
+      - id: text.font.size
+        type: text
+        label: Text Font Size
+        placeholder: 12px
+        required: false
+        description: "The font size of your text in your static overlayer."
+        when:
+          field: type
+          values:
+            - text
+      - id: text.font.style
+        type: text
+        label: Text Font Style
+        placeholder: normal or italic
+        required: false
+        description: "The font style of your text in your static overlayer."
+        options:
+          - normal
+          - italic
+        when:
+          field: type
+          values:
+            - text
+      - id: text.shadow
+        type: text
+        label: Text Shadow
+        placeholder: none;
+        required: false
+        description: "The text-shadow to apply to your static overlayer."
+        when:
+          field: type
+          values:
+            - text
+      - id: image.url
+        type: text
+        label: Image Url
+        placeholder: image url
+        required: false
+        description: "The URL of your image static overlayer."
+        when:
+          field: type
+          values:
+            - image
+{% endblock %}
+{% block baselayers %}
+baselayers:
+  type: objectarray
+  label: Base Layers
+  placeholder: "Base Layers"
+  required: true
+  description: "Base layers available."
+  schema:
+    verbose_singular: Base Layer
+    verbose_plurl: Base Layers
+    fields:
+      - id: id
+        type: text
+        label: ID
+        placeholder: ID
+        required: true
+        description: "The id of your base layer."
+      - id: title
+        type: text
+        label: Title
+        placeholder: title
+        required: true
+        description: "The title of your base layer."
+      - id: description
+        type: text
+        label: Description
+        placeholder: description
+        required: true
+        description: "The description of your base layer."
+      - id: "source.name"
+        type: text
+        label: Source Name
+        placeholder: source name
+        required: true
+        description: "The name of the source of your base layer."
+      - id: "source.attribution"
+        type: text
+        label: Source Attribution
+        placeholder: source attribution
+        required: true
+        description: "The attribution of the source of base layer."
+      - id: "source.url"
+        type: text
+        label: Source URL
+        placeholder: source URL
+        required: true
+        description: "The url of the source of base layer."
+      - id: "legend.label"
+        type: text
+        label: Legend Label
+        placeholder: legend label
+        required: true
+        description: "The label for the legend."
+{% endblock %}
+{% block featurelayers %}
+featurelayers:
+  type: objectarray
+  label: Feature Layers
+  placeholder: "Feature Layers"
+  required: true
+  description: "Feature layers available."
+  schema:
+    verbose_singular: Feature Layer
+    verbose_plurl: Feature Layers
+    fields:
+      - id: id
+        type: text
+        label: ID
+        placeholder: ID
+        required: true
+        description: "The id of your base layer."
+      - id: title
+        type: text
+        label: Title
+        placeholder: title
+        required: true
+        description: "The title of your base layer."
+      - id: description
+        type: text
+        label: Description
+        placeholder: description
+        required: true
+        description: "The description of your base layer."
+      - id: "source.name"
+        type: text
+        label: Source Name
+        placeholder: source name
+        required: true
+        description: "The name of the source of your feature layer."
+      - id: "source.attribution"
+        type: text
+        label: Source Attribution
+        placeholder: source attribution
+        required: true
+        description: "The attribution of the source of feature layer."
+      - id: "legend.label"
+        type: "text"
+        label: "Legend Label"
+        placeholder: "legend label"
+        required: false
+        description: "The label to use in the legend for this layer."
+      - id: "type"
+        type: text
+        label: Type
+        placeholder: wms, geojson
+        required: false
+        description: "The type of the feature layer (wms, geojson)."
+        options:
+          - wms
+          - geojson
+      - id: "wms.layers"
+        type: text
+        label: Layers
+        placeholder: wms, geojson
+        required: false
+        description: "The wms layers of the feature layer."
+        when:
+          field: type
+          values:
+            - wms
+      - id: "wms.url"
+        type: text
+        label: WMS URL
+        placeholder: "http://geonode.wfp.org/geoserver/geonode/wms"
+        required: false
+        description: "The url of the WMS server."
+        when:
+          field: type
+          values:
+            - wms
+      - id: "wfs.version"
+        type: text
+        label: WFS URL
+        placeholder: "1.0.0"
+        required: false
+        description: "The version of the WFS server."
+        options:
+          - "1.0.0"
+          - "1.1.0"
+          - "2.0"
+          - "2.0.2"
+        when:
+          field: type
+          values:
+            - wms
+      - id: "wfs.url"
+        type: text
+        label: WFS URL
+        placeholder: "http://geonode.wfp.org/cors/geoserver/wfs"
+        required: false
+        description: "The url of the WFS server."
+        when:
+          field: type
+          values:
+            - wms
+      - id: "geojson.url"
+        type: text
+        label: GeoJSON URL
+        placeholder: "http://example.com/data.geojson"
+        required: false
+        description: "The url of the geojson service/file."
+        when:
+          field: type
+          values:
+            - geojson
+{% endblock %}
