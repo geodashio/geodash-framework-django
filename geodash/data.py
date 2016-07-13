@@ -2,7 +2,6 @@ import errno
 import psycopg2
 
 from socket import error as socket_error
-from jenks import jenks
 
 from django.conf import settings
 from django.template.loader import get_template
@@ -65,6 +64,7 @@ class data_local_country(object):
 def calc_breaks_natural(values, n_classes):
     natural = None
     if values:
+        from jenks import jenks  # noqa
         natural = [float(bp) for bp in jenks(values, n_classes)]
     else:
         natural = []
@@ -124,7 +124,7 @@ def insertIntoObject(obj, keys, value):
     return obj
 
 
-class GeodashDatabaseConnection(object):
+class GeoDashDatabaseConnection(object):
 
     connection = None
     cursor = None

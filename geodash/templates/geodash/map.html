@@ -21,9 +21,12 @@
 
 {% block init %}
 <script type="text/javascript" language="Javascript">
-    $(function(){
-        geodash.{{ init_function | default_if_none:"init_explore" }}("mainApp");
-    });
+  $(function(){
+    geodash.{{ init_function | default_if_none:"init_explore" }}(
+      "mainApp",
+      $("#{{ geodash_main_id | default_if_none:'geodash-main' }}")
+    );
+  });
 </script>
 {% endblock %}
 
@@ -34,15 +37,13 @@
       id="geodash-main"
       class="row geodash-row geodash-main geodash-controller"
       ng-controller="geodash-main"
-      data-controller-name="geodash-main"
-      data-controller-type="geodash-main">
+      geodash-controller="geodash-main">
       {% block sidebar_left %}{% endblock %}
       <div
         id="geodash-map"
         class="row geodash-row geodash-map geodash-controller{% if user.is_authenticated %} sidebar-open sidebar-right-open{% endif %}"
         ng-controller="geodash-map"
-        data-controller-name="geodash-map"
-        data-controller-type="geodash-map">
+        geodash-controller="geodash-map">
         {% block map_controllers %}
         {% include "geodash/_includes/map_legend.html" with legend_title="Legend - Click to Open" %}
         {% include "geodash/_includes/map_overlays.html" %}
@@ -50,8 +51,7 @@
         <div id="map"
           class="geodash-controller geodash-map-map"
           ng-controller="geodash-map-map"
-          data-controller-name="geodash-map-map"
-          data-controller-type="geodash-map-map">
+          geodash-controller="geodash-map-map">
         </div>
       </div>
       {% block sidebar_right %}{% endblock %}
