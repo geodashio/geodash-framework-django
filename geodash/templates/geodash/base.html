@@ -12,6 +12,10 @@
     {% block head_fonts %}
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
     {% endblock %}
+    {% if GEODASH_STATIC_MONOLITH_CSS %}
+    <!-- CSS / Monolith -->
+    {% block head_monolith_css %}{% endblock %}
+    {% else %}
     <!-- CSS / External-->
     <link href="{{ STATIC_URL}}geodash/lib/jquery-ui/{{ GEODASH_STATIC_DEPS.jqueryui.version }}/jquery-ui.min.css" rel="stylesheet"/>
     <link href="{{ STATIC_URL}}geodash/lib/select2/select2-{{ GEODASH_STATIC_DEPS.select2.version }}/dist/css/select2.min.css" rel="stylesheet"/>
@@ -28,6 +32,7 @@
     {% block head_main_css %}
     <link href='{{ STATIC_URL }}geodash/build/css/main.css?v={{ GEODASH_STATIC_VERSION }}' rel='stylesheet' />
     {% endblock %}
+    {% endif %}
     <style type="text/css">[ng\:cloak],[ng-cloak],[data-ng-cloak],[x-ng-cloak],.ng-cloak,.x-ng-cloak,.ng-hide:not(.ng-hide-animate){display:none !important;}</style>
     <!-- JavaScript / Polyfill -->
     {% block polyfill %}{% endblock %}
@@ -62,10 +67,15 @@
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/{{ GEODASH_STATIC_DEPS.angular.version }}/angular-sanitize.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/{{ GEODASH_STATIC_DEPS.angular.version }}/angular-cookies.min.js"></script>
     {% endif %}
-    {% if GEODASH_STATIC_DEBUG.bootstrap %}
-    <script src="{{ STATIC_URL}}geodash/lib/bootstrap/3.3.5/dist/js/bootstrap.js"></script>
+    {% if GEODASH_STATIC_MONOLITH_JS %}
+    <!-- JavaScript / Monolith -->
+    {% block head_monolith_js %}{% endblock %}
     {% else %}
-    <script src="{{ STATIC_URL}}geodash/lib/bootstrap/3.3.5/dist/js/bootstrap.min.js"></script>
+    <!-- GEODASH_STATIC_MONOLITH_JS is False -->
+    {% if GEODASH_STATIC_DEBUG.bootstrap %}
+    <script src="{{ STATIC_URL}}geodash/lib/bootstrap/{{ GEODASH_STATIC_DEPS.bootstrap.version }}/dist/js/bootstrap.js"></script>
+    {% else %}
+    <script src="{{ STATIC_URL}}geodash/lib/bootstrap/{{ GEODASH_STATIC_DEPS.bootstrap.version }}/dist/js/bootstrap.min.js"></script>
     {% endif %}
     {% if GEODASH_STATIC_DEBUG.d3 %}
     <script src="{{ STATIC_URL}}geodash/lib/d3/{{ GEODASH_STATIC_DEPS.d3.version }}/d3.js"></script>
@@ -100,6 +110,8 @@
     <script src="{{ STATIC_URL }}geodash/build/js/main.min.js?v={{ GEODASH_STATIC_VERSION }}"></script>
     {% endif %}
     {% endblock %}
+    {% endif %}
+
     {% block head_inline %}
     {% include "geodash/_includes/snippet_const.html" %}
     {% endblock %}
