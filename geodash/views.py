@@ -26,7 +26,7 @@ class geodash_data_view(View):
 
     def get(self, request, *args, **kwargs):
         data = None
-        if settings.geodash_CACHE_DATA:
+        if settings.GEODASH_CACHE_DATA:
             client = provision_memcached_client()
             if client:
                 key = self._build_key(request, *args, **kwargs)

@@ -41,7 +41,7 @@
       {% block sidebar_left %}{% endblock %}
       <div
         id="geodash-map"
-        class="row geodash-row geodash-map geodash-controller{% if include_sidebar_right %} sidebar-open sidebar-right-open{% endif %}"
+        class="row geodash-row geodash-map geodash-controller{% if include_sidebar_left %} sidebar-open sidebar-left-open{% endif %}{% if include_sidebar_right %} sidebar-open sidebar-right-open{% endif %}"
         ng-controller="geodash-map"
         geodash-controller="geodash-map">
         {% block map_controllers %}
