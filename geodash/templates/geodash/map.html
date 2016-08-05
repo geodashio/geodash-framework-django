@@ -55,13 +55,13 @@
         </div>
       </div>
       {% block sidebar_right %}{% endblock %}
-      {% block modals %}
       <div id="geodash-modals">
+      {% block modals %}
       {% include "geodash/_includes/modals/about.html" %}
       {% include "geodash/_includes/modals/download.html" %}
       {% include "geodash/_includes/modals/config.html" %}
-      </div>
       {% endblock %}
+      </div>
     </div>
     {% block footer %}{% endblock %}
 </div>
