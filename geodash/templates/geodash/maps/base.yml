@@ -82,3 +82,6 @@ controls:
   sidebar: false
   zoom: true
 {% endblock %}
+{% block sidebar %}
+sidebar:
+{% endblock %}
