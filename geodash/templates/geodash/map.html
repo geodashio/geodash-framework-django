@@ -53,6 +53,11 @@
           ng-controller="geodash-map-map"
           geodash-controller="geodash-map-map">
         </div>
+        <div id="geodash-popups" style="display:none;">
+        {% block popups %}
+        {% if GEODASH_MAPPING_LIBRARY == "ol3" %}<div id="popup"></div>{% endif %}
+        {% endblock %}
+        </div>
       </div>
       {% block sidebar_right %}{% endblock %}
       <div id="geodash-modals">
