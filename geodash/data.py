@@ -149,6 +149,7 @@ class GeoDashDatabaseConnection(object):
 
     def exec_update(self, sql):
         self.cursor.execute(sql)
+        self.connection.commit()  # makes sure updates are actually comitted to database
 
     def __init__(self):
         self.connection = psycopg2.connect(settings.GEODASH_DB_CONN_STR)
