@@ -1,0 +1,80 @@
+{% extends "geodashserver/maps/base.yml" %}
+
+{% block title %}
+title: {{ title }}
+{% endblock %}
+
+{% block view %}{{ block.super }}{% endblock %}
+
+{% block baselayers %}{{ block.super }}{% endblock %}
+
+{% block featurelayers %}{% verbatim %}
+featurelayers:
+  gis_presence:
+    type: geojson
+    title: "GIS Presence"
+    description: "This layer contains locations and additional information of WFP warehouses and facilities worldwide, including warehouses, offices, and ports.  Stored on [WFP GeoNode](http://geonode.wfp.org)."
+    source:
+      name: "WFP"
+      attribution: "WFP GeoNode"
+      url: "http://geonode.wfp.org/gis/api/v1/employee/?format=json&geojson&limit=100&duties_type=0"
+    legend:
+      label: "GIS Presence by Regional Bureaux"
+      symbol:
+        type: "graphic"
+        width: 16
+        height: 16
+        preview: false
+        url: "/static/geodashserver/assets/img/Legend_GIS_Presence.png"
+  wfp_bureaus:
+    type: WMS
+    title: "WFP Presence by Regional Bureaux"
+    description: "This layer contains the coverage of WFP bureaus and oversight countries.  Stored on [WFP GeoNode](http://geonode.wfp.org)."
+    source:
+      name: "WFP"
+      attribution: "WFP GeoNode"
+    wms:
+      version: "1.1.1"
+      layers: ["geonode:wld_bnd_presence_wfp"]
+      styles: []
+      format: 'image/png'
+      transparent: true
+      buffer: 256
+      url: "http://geonode.wfp.org/geoserver/geonode/wms"
+    legend:
+      label: "WFP Presence by Regional Bureaux"
+      symbol:
+        type: "graphic"
+        width: 16
+        height: 16
+        preview: false
+        url: "/static/geodashserver/assets/img/Legend_RB.png"
+{% endverbatim %}{% endblock %}
+
+{% block legendlayers %}
+legendlayers:
+  - "gis_presence"
+  - "wfp_bureaus"
+  - osm
+  - osm_humanitarian
+{% endblock %}
+
+{% block renderlayers %}
+renderlayers:
+  - "gis_presence"
+  - "wfp_bureaus"
+  - "osm"
+  - "osm_humanitarian"
+{% endblock %}
+
+{% block charts %}
+{% endblock %}
+
+{% block controls %}
+controls:
+  calendar: false
+  filters: false
+  legend: true
+  sidebar: false
+  zoom: true
+{% endblock %}

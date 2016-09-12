@@ -1,0 +1,46 @@
+{% extends "geodashserver/map.html" %}
+
+{% block header %}
+{% with "GeoDash - "|add:map_config.title as navbar_title %}
+{% include "geodashserver/_includes/header.html"%}
+{% endwith %}
+{% endblock %}
+
+{% block initial_data %}
+<script type="text/javascript" language="Javascript">
+    geodash.initial_data =
+    {
+      "data": {
+        "editor": {{ editor_json|safe }},
+        "map_config_schema": {{ map_config_schema_json|safe }},
+        "security_schema": {{ security_schema_json|safe }},
+        "state_schema": {{ state_schema_json|safe }},
+        "dashboards_typeahead": {{ GEODASH_DASHBOARDS_TYPEAHEAD|safe }},
+        "security": {{ security_json|safe }},
+        "endpoints": {{ endpoints_json|safe }},
+        "users": {{ users | safe }}
+      }
+    }
+</script>
+{% endblock %}
+
+{% block modals %}
+{{ block.super }}
+{% include "geodashserver/_includes/config.html" %}
+{% include "geodashserver/_includes/security.html" %}
+{% endblock %}
+
+{% block map_controllers %}
+{% if include_sidebar_right %}
+<div
+  id="geodash-map-sidebar-toggle-right"
+  class="geodash-controller"
+  selector="#geodash-map-sidebar-toggle-right, #geodash-sidebar-right, #geodash-map"
+  geodash-sidebar-toggle-right>
+</div>
+{% endif %}
+{% include "geodash/_includes/map_overlays.html" %}
+{% if map_config.controls.legend %}
+{% include "geodash/_includes/map_legend.html" with legend_title=map_config.legend.title %}
+{% endif %}
+{% endblock %}

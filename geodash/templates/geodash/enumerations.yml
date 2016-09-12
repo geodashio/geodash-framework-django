@@ -1,0 +1,10 @@
+---
+state_schema:
+  view:
+    lat: float
+    lon: float
+    z: integer
+    baselayer: string
+    featurelayers: stringarray
+  filters: {}
+  styles: {}

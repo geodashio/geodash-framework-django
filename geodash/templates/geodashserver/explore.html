@@ -1,0 +1,36 @@
+{% extends "geodashserver/map.html" %}
+
+{% block title %}GeoDash - Explore{% endblock %}
+
+{% block extra_head %}{{ block.super }}{% endblock %}
+
+{% block init %}{{ block.super }}{% endblock %}
+
+{% block initial_data %}
+<script type="text/javascript" language="Javascript">
+    geodash.initial_data =
+    {
+      "data": {
+        "dashboards_typeahead": {{ GEODASH_DASHBOARDS_TYPEAHEAD|safe }}
+      }
+    }
+</script>
+{% endblock %}
+
+{% block sidebar_left %}{% endblock %}
+{% block sidebar_right %}{% endblock %}
+
+{% block modals %}
+{{ block.super }}
+<div
+  class="geodash-controller geodash-controller-modal geodash-modal modal fade geodashserver-modal-welcome"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="myModalLabel"
+  geodashserver-modal-welcome>
+</div>
+{% endblock %}
+
+{% block extra_content %}{% endblock %}
+
+{% block footer %}{% endblock %}

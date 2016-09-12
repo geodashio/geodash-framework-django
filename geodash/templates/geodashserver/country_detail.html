@@ -1,0 +1,13 @@
+{% extends "geodash/map.html" %}
+{% block title %}GeoDash - {{ country_title }}{% endblock %}
+{% block extra_head %}
+{{ block.super }}
+<script>
+var geojson_layers = [];
+</script>
+{% endblock %}
+{% block extra_content %}
+<script>
+</script>
+{% endblock %}
+{% block footer %}{% endblock %}

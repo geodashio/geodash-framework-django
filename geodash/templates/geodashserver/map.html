@@ -1,0 +1,117 @@
+{% extends "geodash/map.html" %}
+
+{% load geodash_tags %}
+
+{% block title %}{{ map_config.title }}{% endblock %}
+
+{% block head_fonts %}
+<link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+{% endblock %}
+
+{% block head_bootstrap_css %}
+<link href="{{ STATIC_URL }}geodashserver/build/bootstrap/bootstrap.css" rel="stylesheet"/>
+{% endblock %}
+
+{% block head_main_css %}
+<link href='{{ STATIC_URL }}geodashserver/build/css/geodashserver.css?v={{ GEODASH_SERVER_STATIC_VERSION }}' rel='stylesheet' />
+{% endblock %}
+
+{% block head_monolith_css %}
+<link href='{{ STATIC_URL }}geodashserver/build/css/geodashserver.full.css?v={{ GEODASH_SERVER_STATIC_VERSION }}' rel='stylesheet' />
+{% endblock %}
+
+{% block polyfill %}
+{% if GEODASHSERVER_STATIC_DEPS.polyfill %}
+<script src="{{ STATIC_URL }}geodashserver/build/js/polyfill.js?v={{ GEODASH_SERVER_STATIC_VERSION }}"></script>
+{% else %}
+<script src="{{ STATIC_URL }}geodashserver/build/js/polyfill.min.js?v={{ GEODASH_SERVER_STATIC_VERSION }}"></script>
+{% endif %}
+{% endblock %}
+
+{% block head_main_js %}
+<script src="{{ STATIC_URL }}geodash/lib/showdown/1.3.0/showdown.js?v={{ GEODASH_SERVER_STATIC_VERSION }}"></script>
+{% if GEODASH_SERVER_STATIC_DEBUG.main %}
+<script src="{{ STATIC_URL }}geodashserver/build/js/monkeypatch.js?v={{ GEODASH_SERVER_STATIC_VERSION }}"></script>
+<script src="{{ STATIC_URL }}geodashserver/build/js/geodashserver.js?v={{ GEODASH_SERVER_STATIC_VERSION }}"></script>
+{% else %}
+<script src="{{ STATIC_URL }}geodashserver/build/js/monkeypatch.min.js?v={{ GEODASH_SERVER_STATIC_VERSION }}"></script>
+<script src="{{ STATIC_URL }}geodashserver/build/js/geodashserver.min.js?v={{ GEODASH_SERVER_STATIC_VERSION }}"></script>
+{% endif %}
+{% endblock %}
+
+{% block head_monolith_js %}
+{% if GEODASH_STATIC_DEBUG.monolith %}
+<script src="{{ STATIC_URL }}geodashserver/build/js/geodashserver.full.js?v={{ GEODASH_SERVER_STATIC_VERSION }}"></script>
+{% else %}
+<script src="{{ STATIC_URL }}geodashserver/build/js/geodashserver.full.min.js?v={{ GEODASH_SERVER_STATIC_VERSION }}"></script>
+{% endif %}
+{% endblock %}
+
+{% block head_inline %}
+{% include "geodash/_includes/snippet_const.html" %}
+{% endblock %}
+
+{% block map_config %}
+<script>
+  geodash.map_config = {{ map_config_json|safe }};
+</script>
+{% endblock %}
+
+{% block initial_data %}{{ super.block }}{% endblock %}
+
+{% block initial_state %}
+<script>
+  geodash.initial_state = {{ state_json|safe }};
+  geodash.state_schema = {{ state_schema_json|safe }};
+  {% if perms_json %}
+  geodash.perms = {{ perms_json|safe }};
+  {% endif %}
+</script>
+{% endblock %}
+
+{% block header %}{% include "geodashserver/_includes/header.html" with navbar_title="WFP GeoDash" %}{% endblock %}
+
+{% block sidebar_right %}
+{% if include_sidebar_right %}
+<div
+  id="geodash-sidebar-right"
+  class="geodash-sidebar geodash-sidebar-right geodash-controller sidebar-open sidebar-right-open"
+  style="overflow-x: hidden; overflow-y: scroll;"
+  ng-controller="geodash-sidebar-right">
+  <div geodash-dashboard-editor></div>
+  <div class="geodash-sidebar-right-modals">
+    <div
+      id="geodash-modal-edit-field"
+      class="geodash-controller geodash-controller-modal geodash-modal modal fade geodash-edit-field"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="myModalLabel"
+      geodash-modal-edit-field>
+    </div>
+    <div
+      id="geodash-modal-edit-object"
+      class="geodash-controller geodash-controller-modal geodash-modal modal fade geodash-edit-object"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="myModalLabel"
+      geodash-modal-edit-object>
+    </div>
+    <div
+      id="geodash-modal-search-object"
+      class="geodash-controller geodash-controller-modal geodash-modal modal fade geodash-search-object"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="myModalLabel"
+      geodash-modal-search-object>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block map_controllers %}
+{% include "geodash/_includes/map_overlays.html" %}
+{% include "geodash/_includes/map_legend.html" with legend_title="Legend - Click to Open" %}
+{% endblock %}
+
+{% block footer %}{% endblock %}

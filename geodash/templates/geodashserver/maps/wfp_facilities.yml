@@ -1,0 +1,131 @@
+{% extends "geodashserver/maps/base.yml" %}
+
+{% block title %}
+title: {{ title }}
+{% endblock %}
+
+{% block view %}{{ block.super }}{% endblock %}
+
+{% block baselayers %}{{ block.super }}{% endblock %}
+
+{% block featurelayers %}{% verbatim %}
+featurelayers:
+  wfp_facilities:
+    type: WMS
+    title: "WFP Facilities"
+    description: "This layer contains locations and additional information of WFP warehouses and facilities worldwide, including warehouses, offices, and ports.  Stored on [WFP GeoNode](http://geonode.wfp.org)."
+    source:
+      name: "WFP"
+      attribution: "WFP GeoNode"
+    wms:
+      version: "1.1.1"
+      layers: ["geonode:wld_poi_facilities_wfp", "geonode:wld_poi_warehouses_wfp"]
+      styles: []
+      format: 'image/png'
+      transparent: true
+      buffer: 256
+      url: "http://geonode.wfp.org/geoserver/geonode/wms"
+    wfs:
+      version: "1.0.0"  # Needs to 1.0.0 or returns bad results for some reason.
+      url: "http://geonode.wfp.org/cors/geoserver/wfs"
+    legend:
+      label: "WFP Facilities"
+      symbol:
+        type: "graphic"
+        width: 16
+        height: 16
+        preview: false
+    click: popup
+    popup:
+      title: "WFP Faciliity"
+      maxWidth: 550
+      panes:
+        - id: "popup_overview"
+          tab:
+            label: "Overview"
+          fields:
+            - output: name
+              inputs:
+                - 'whlocation'
+                - 'place'
+              label: Name
+            - attribute: facility
+              label: Facility
+              when: "defined"
+            - attribute: status
+              label: Status
+            - attribute: country
+              label: Country
+        - id: "popup_location"
+          tab:
+            label: "Location"
+          fields:
+            - attribute: locprecision
+              label: Location Precision
+            - attribute: latitude
+              label: Latitude
+            - attribute: longitude
+              label: Longitude
+            - attribute: compasscode
+              label: Compass Code
+              when: "defined"
+            - attribute: geonameid
+              label: GeoName ID
+              when: "defined"
+        - id: "popup_currency"
+          tab:
+            label: "Currency"
+          fields:
+            - attribute: lastcheckdate
+              label: Last Check Date
+              type: date
+              format: 'medium'
+            - attribute: createdate
+              label: Date Created
+              type: date
+              format: 'medium'
+            - attribute: updatedate
+              label: Date Updated
+              type: date
+              format: 'medium'
+        - id: "popup_links"
+          tab:
+            label: "Links"
+          fields:
+            - attribute: geonameid
+              value: "{{ attributes.geonameid }}"
+              type: link
+              label: "GeoNames"
+              url: "http://www.geonames.org/{{ attributes.geonameid }}/"
+              when: "defined"
+            - value: "{{ geometry.lat | number : 4 }}, {{ geometry.lng | number : 4 }}"
+              type: link
+              label: "OpenStreetMap"
+              url: "https://www.openstreetmap.org/#map=15/{{ geometry.lat }}/{{ geometry.lng }}"
+{% endverbatim %}{% endblock %}
+
+{% block legendlayers %}
+legendlayers:
+  - "wfp_facilities"
+  - osm
+  - osm_humanitarian
+{% endblock %}
+
+{% block renderlayers %}
+renderlayers:
+  - "wfp_facilities"
+  - "osm"
+  - "osm_humanitarian"
+{% endblock %}
+
+{% block charts %}
+{% endblock %}
+
+{% block controls %}
+controls:
+  calendar: false
+  filters: false
+  legend: true
+  sidebar: false
+  zoom: true
+{% endblock %}

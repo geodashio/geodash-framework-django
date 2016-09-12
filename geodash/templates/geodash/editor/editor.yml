@@ -1,0 +1,58 @@
+---
+panes:
+  - id: editor_basic
+    label: Basic
+    fields:
+      - config.title
+      - config.slug
+      - config.description
+      - config.pages
+      - config.about.title
+      - config.welcome.title
+      - config.welcome.intro
+      - config.welcome.about
+  - id: editor_security
+    label: Security
+    fields:
+      - security.advertised
+      - security.published
+      - security.view_geodashdashboard
+      - security.change_geodashdashboard
+      - security.delete_geodashdashboard
+  - id: editor_view
+    label: View
+    fields:
+      - config.view.latitude
+      - config.view.longitude
+      - config.view.zoom
+      - config.view.minZoom
+      - config.view.maxZoom
+  - id: editor_controls
+    label: Controls
+    fields:
+      - config.controls.attribution
+      - config.controls.calendar
+      - config.controls.filters
+      - config.controls.legend
+      - config.controls.sidebar
+      - config.controls.zoom
+  - id: editor_overlays
+    label: Static Overlays
+    fields:
+      - config.overlays
+  - id: editor_layers
+    label: Layers
+    fields:
+      - config.renderlayers
+      - config.featurelayers
+      - config.view.baselayer
+      - config.baselayers
+  - id: legend
+    label: Legend
+    fields:
+      - config.legend.title
+      - config.legendlayers
+  - id: servers
+    label: Servers
+    fields:
+      - config.servers

@@ -1,0 +1,70 @@
+{% extends "geodash/maps/base.yml" %}
+
+{% block title %}
+title: Placeholder
+{% endblock %}
+
+{% block about %}
+about:
+  title: Placeholder / About"
+  panes: []
+{% endblock %}
+
+{% block welcome %}
+welcome:
+  title: "GeoDash - Geospatial Dashboard"
+  intro: "Welcome to GeoDash!\n\n GeoDash is a digital service provided by the World Food Programme's Emergency Preparedness and Support Response Division (OSE) enabling users to create and share dashboards of geospatial data.\n\n"
+  about: "GeoDash or (Geospatial Dashboard) enables users to create and share dashboards of geospatial data.  GeoDash can visualize data from WFP systems (e.g., WFP GeoNode) and outside systems using open standards.  GeoDash is built on a fully opensource software and built in the open ([http://geodash.io](http://geodash.io)).\n\nGeoDash is a digital service provided by the World Food Programme's Emergency Preparedness and Support Response Division (OSE) and maintained by OSE's GIS Unit.\n\n"
+{% endblock %}
+
+{% block download %}
+download:
+  title: "Placeholder / Download"
+  panes: []
+{% endblock %}
+
+{% block pages %}{% verbatim %}
+pages:
+  home: ""
+  explore: "/explore"
+  dashboard: "/dashboard/{{ slug }}"
+{% endverbatim %}{% endblock %}
+
+{% block legend %}
+legend:
+  title: "Layer"
+{% endblock %}
+
+{% block baselayers %}
+baselayers:
+  - id: "osm_humanitarian"
+    title: OpenStreetMap / Humanitarian
+    description: "OpenStreetMap Basemap, Humanitarian Style"
+    source:
+      name: "OpenStreetMap"
+      attribution: "&copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a>"
+      url: "http://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png"
+    legend:
+      label: "OpenStreetMap / Humanitarian"
+  - id: "osm"
+    title: "OpenStreetMap"
+    description: "OpenStreetMap Basemap, Standard Style"
+    source:
+      name: "OpenStreetMap"
+      attribution: "&copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a>"
+      url: "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+    legend:
+      label: "OpenStreetMap"
+{% endblock %}
+
+{% block legendlayers %}
+legendlayers:
+  - osm_humanitarian
+  - osm
+{% endblock %}
+
+{% block renderlayers %}
+renderlayers:
+  - osm
+  - osm_humanitarian
+{% endblock %}

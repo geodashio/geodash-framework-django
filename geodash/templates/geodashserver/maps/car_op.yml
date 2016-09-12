@@ -1,0 +1,403 @@
+{% extends "geodashserver/maps/base.yml" %}
+
+{% block title %}
+title: {{ title }}
+{% endblock %}
+
+{% block slug %}
+slug: {{ slug }}
+{% endblock %}
+
+{% block description %}
+description: "{{ description }}"
+{% endblock %}
+
+{% block view %}{{ block.super }}{% endblock %}
+
+{% block baselayers %}{{ block.super }}{% endblock %}
+
+{% block featurelayers %}{% verbatim %}
+featurelayers:
+  wld_poi_facilities_wfp:
+    type: WMS
+    title: "Global WFP Facilities"
+    description: "WFP Facilities worldwide, Country Office, Sub-Office, Field Office, Area Office, Humanitarian Response Depot."
+    source:
+      name: "WFP"
+      attribution: "WFP GeoNode"
+    wms:
+      version: "1.1.1"
+      layers: ["geonode:wld_poi_facilities_wfp"]
+      styles: []
+      format: 'image/png'
+      transparent: true
+      buffer: 256
+      url: "http://geonode.wfp.org/geoserver/geonode/wms"
+    wfs:
+      version: "1.0.0"  # Needs to 1.0.0 or returns bad results for some reason.
+      url: "http://geonode.wfp.org/cors/geoserver/wfs"
+    legend:
+      label: "Global WFP Facilities"
+      symbol:
+        type: "graphic"
+        width: 16
+        height: 16
+        preview: false
+    click: popup
+    popup:
+      title: "Global WFP Facilities: {{ feature.attributes.name }}"
+      maxWidth: 550
+      panes:
+        - id: "popup_overview"
+          tab:
+            label: "Overview"
+          fields:
+            - output: name
+              inputs:
+                - 'whlocation'
+                - 'place'
+              label: Name
+            - attribute: facility
+              label: Facility
+              when: "defined"
+            - attribute: status
+              label: Status
+            - attribute: country
+              label: Country
+        - id: "popup_location"
+          tab:
+            label: "Location"
+          fields:
+            - attribute: locprecision
+              label: Location Precision
+            - attribute: latitude
+              label: Latitude
+            - attribute: longitude
+              label: Longitude
+            - attribute: compasscode
+              label: Compass Code
+              when: "defined"
+            - attribute: geonameid
+              label: GeoName ID
+              when: "defined"
+        - id: "popup_currency"
+          tab:
+            label: "Currency"
+          fields:
+            - attribute: lastcheckdate
+              label: Last Check Date
+              type: date
+              format: 'medium'
+              fallback: 'Not specified'
+            - attribute: createdate
+              label: Date Created
+              type: date
+              format: 'medium'
+            - attribute: updatedate
+              label: Date Updated
+              type: date
+              format: 'medium'
+        - id: "popup_links"
+          tab:
+            label: "Links"
+          fields:
+            - attribute: geonameid
+              value: "{{ feature.attributes.geonameid }}"
+              type: link
+              label: "GeoNames"
+              url: "http://www.geonames.org/{{ feature.attributes.geonameid }}/"
+              when: "defined"
+            - value: "{{ feature.geometry.lat | number : 4 }}, {{ feature.geometry.lng | number : 4 }}"
+              type: link
+              label: "OpenStreetMap"
+              url: "https://www.openstreetmap.org/#map=15/{{ feature.geometry.lat }}/{{ feature.geometry.lng }}"
+  wld_trs_airports_wfp:
+    type: WMS
+    title: "Global Airports"
+    description: "This layer contains airports locations with a particular classification for UNHAS connections and hubs."
+    source:
+      name: "WFP"
+      attribution: "WFP GeoNode"
+    wms:
+      version: "1.1.1"
+      layers: ["geonode:wld_trs_airports_wfp"]
+      styles: []
+      format: 'image/png'
+      transparent: true
+      buffer: 256
+      url: "http://geonode.wfp.org/geoserver/geonode/wms"
+    wfs:
+      version: "1.0.0"  # Needs to 1.0.0 or returns bad results for some reason.
+      url: "http://geonode.wfp.org/cors/geoserver/wfs"
+    legend:
+      label: "Global Airports"
+      symbol:
+        type: "graphic"
+        width: 16
+        height: 16
+        preview: false
+    click: popup
+    popup:
+      title: "Global Airports: {{ feature.attributes.name }}"
+      maxWidth: 550
+      panes:
+        - id: "popup_overview"
+          tab:
+            label: "Overview"
+          fields:
+            - output: name
+              inputs:
+                - 'nameshort'
+                - 'namelong'
+              label: Name
+            - attribute: facility
+              label: Facility
+              when: "defined"
+            - attribute: status
+              label: Status
+            - attribute: country
+              label: Country
+        - id: "popup_location"
+          tab:
+            label: "Location"
+          fields:
+            - attribute: locprecision
+              label: Location Precision
+            - attribute: latitude
+              label: Latitude
+            - attribute: longitude
+              label: Longitude
+            - attribute: compasscode
+              label: Compass Code
+              when: "defined"
+            - attribute: geonameid
+              label: GeoName ID
+              when: "defined"
+        - id: "popup_currency"
+          tab:
+            label: "Currency"
+          fields:
+            - attribute: lastcheckdate
+              label: Last Check Date
+              type: date
+              format: 'medium'
+            - attribute: createdate
+              label: Date Created
+              type: date
+              format: 'medium'
+            - attribute: updatedate
+              label: Date Updated
+              type: date
+              format: 'medium'
+        - id: "popup_links"
+          tab:
+            label: "Links"
+          fields:
+            - attribute: geonameid
+              value: "{{ feature.attributes.geonameid }}"
+              type: link
+              label: "GeoNames"
+              url: "http://www.geonames.org/{{ feature.attributes.geonameid }}/"
+              when: "defined"
+            - value: "{{ feature.geometry.lat | number : 4 }}, {{ feature.geometry.lng | number : 4 }}"
+              type: link
+              label: "OpenStreetMap"
+              url: "https://www.openstreetmap.org/#map=15/{{ feature.geometry.lat }}/{{ feature.geometry.lng }}"
+  wld_trs_unhasroutes_wfp:
+    type: WMS
+    title: "Global UNHAS Routes"
+    description: "UNHAS (United Nations Humanitarian Air Service) routes for passenger and cargo air transport services used byg humanitarian and development agencies and their implementing NGO partners."
+    source:
+      name: "WFP"
+      attribution: "WFP GeoNode"
+      site: "WFP GeoNode"
+    wms:
+      version: "1.1.1"
+      layers: ["geonode:wld_trs_unhasroutes_wfp"]
+      styles: []
+      format: 'image/png'
+      transparent: true
+      buffer: 256
+      url: "http://geonode.wfp.org/geoserver/geonode/wms"
+    wfs:
+      version: "1.0.0"  # Needs to 1.0.0 or returns bad results for some reason.
+      url: "http://geonode.wfp.org/cors/geoserver/wfs"
+    legend:
+      label: "Global UNHAS Routes"
+      symbol:
+        type: "graphic"
+        width: 16
+        height: 16
+        preview: false
+    click: popup
+    popup:
+      title: "Global UNHAS Routes: {{ feature.attributes.name }}"
+      maxWidth: 550
+      panes:
+        - id: "popup_overview"
+          tab:
+            label: "Overview"
+          fields:
+            - output: name
+              inputs:
+                - 'Name'
+              label: Name
+            - attribute: Status
+              label: Status
+            - attribute: operatedby
+              label: Operated By
+        - id: "popup_location"
+          tab:
+            label: "Location"
+          fields:
+            - attribute: Traveltime
+              label: Travel Time
+              fallback: 'Not specified'
+            - attribute: distancekm
+              label: Distance (KM)
+              fallback: 'Not specified'
+        - id: "popup_currency"
+          tab:
+            label: "Currency"
+          fields:
+            - attribute: lastcheckdate
+              label: Last Check Date
+              type: date
+              format: 'medium'
+            - attribute: createdate
+              label: Date Created
+              type: date
+              format: 'medium'
+            - attribute: updatedate
+              label: Date Updated
+              type: date
+              format: 'medium'
+        - id: "popup_links"
+          tab:
+            label: "Links"
+          fields:
+            - value: "CAR Operation"
+              type: link
+              label: "Logistics Cluster:"
+              url: "http://www.logcluster.org/ops/caf13a"
+            - value: "{{ layer.title }} via {{ layer.source.site }}"
+              type: link
+              label: "Source"
+              url: "http://geonode.wfp.org/layers/{{ layer.wms.layers | first }}"
+  wld_trs_supplyroutes_wfp:
+    type: WMS
+    title: "Global Supply Routes"
+    description: "Global supply routes for Transportation of Food and Non Food Items - Roads, Railways, Waterway, Airways.\nThis layer is built by linking origin/destination locations using the most direct route on main roads. In reality, the supply routes can divert from the ones displayed here depending on many local factors. The routes shown in this dataset are only indicative and have to be used as such."
+    source:
+      name: "WFP"
+      attribution: "WFP GeoNode"
+      site: "WFP GeoNode"
+    wms:
+      version: "1.1.1"
+      layers: ["geonode:wld_trs_supplyroutes_wfp"]
+      styles: []
+      format: 'image/png'
+      transparent: true
+      buffer: 256
+      url: "http://geonode.wfp.org/geoserver/geonode/wms"
+    wfs:
+      version: "1.0.0"  # Needs to 1.0.0 or returns bad results for some reason.
+      url: "http://geonode.wfp.org/cors/geoserver/wfs"
+    legend:
+      label: "Global Supply Routes"
+      symbol:
+        type: "graphic"
+        width: 16
+        height: 16
+        preview: false
+    click: popup
+    popup:
+      title: "Global Supply Routes: {{ feature.attributes.name }}"
+      maxWidth: 550
+      panes:
+        - id: "popup_overview"
+          tab:
+            label: "Overview"
+          fields:
+            - output: name
+              inputs:
+                - 'nameportion'
+              label: Name
+            - attribute: Status
+              label: Status
+            - attribute: practicability
+              label: Practicability
+        - id: "popup_location"
+          tab:
+            label: "Location"
+          fields:
+            - attribute: Traveltime
+              label: Travel Time
+              fallback: 'Not specified'
+            - value: "{{ feature.attributes.distancekm }} km"
+              label: Distance (KM)
+              fallback: 'Not specified'
+        - id: "popup_currency"
+          tab:
+            label: "Currency"
+          fields:
+            - attribute: lastcheckdate
+              label: Last Check Date
+              type: date
+              format: 'medium'
+              fallback: 'Not specified'
+            - attribute: createdate
+              label: Date Created
+              type: date
+              format: 'medium'
+              fallback: 'Not specified'
+            - attribute: updatedate
+              label: Date Updated
+              type: date
+              format: 'medium'
+              fallback: 'Not specified'
+        - id: "popup_links"
+          tab:
+            label: "Links"
+          fields:
+            - value: "CAR Operation"
+              type: link
+              label: "Logistics Cluster:"
+              url: "http://www.logcluster.org/ops/caf13a"
+            - value: "{{ layer.title }} via {{ layer.source.site }}"
+              type: link
+              label: "Source"
+              url: "http://geonode.wfp.org/layers/{{ layer.wms.layers | first }}"
+{% endverbatim %}{% endblock %}
+
+{% block legendlayers %}
+legendlayers:
+  - "wld_poi_facilities_wfp"
+  - "wld_trs_airports_wfp"
+  - "wld_trs_unhasroutes_wfp"
+  - "wld_trs_supplyroutes_wfp"
+  - osm
+  - osm_humanitarian
+{% endblock %}
+
+{% block renderlayers %}
+renderlayers:
+  - "wld_poi_facilities_wfp"
+  - "wld_trs_airports_wfp"
+  - "wld_trs_unhasroutes_wfp"
+  - "wld_trs_supplyroutes_wfp"
+  - "osm"
+  - "osm_humanitarian"
+{% endblock %}
+
+{% block charts %}
+{% endblock %}
+
+{% block controls %}
+controls:
+  calendar: false
+  filters: false
+  legend: true
+  sidebar: false
+  zoom: true
+{% endblock %}

@@ -1,0 +1,30 @@
+<footer class="footer">
+      <div class="footer-container">
+        <div class="row">
+          <div class="col-md-8" id="left-footer-menu">
+              <a href="{% url "home" %}/">Home</a> |
+	            <a href="{% url "explore" %}">Explore</a> |
+              <a
+                class="geodash-intent"
+                href="#"
+                data-intent-name="toggleModal"
+                data-intent-data="{&quot;id&quot;:&quot;geodash-modal-download&quot;,&quot;dynamic&quot;:{&quot;download&quot;:[&quot;map_config&quot;,&quot;download&quot;]}}"
+                data-intent-ctrl="geodash-main">Download</a> |
+              <a
+                class="geodash-intent"
+                href="#"
+                data-intent-name="toggleModal"
+                data-intent-data="{&quot;id&quot;:&quot;geodash-modal-about&quot;,&quot;dynamic&quot;:{&quot;about&quot;:[&quot;map_config&quot;,&quot;about&quot;]}}"
+                data-intent-ctrl="geodash-main">About</a>
+              {% if user.is_authenticated %} | <a href="{% url "admin:index" %}" style="text-decoration: underline;">Admin</a>{% endif %}
+          </div>
+          <div class="col-md-4" id="right-footer-menu">
+              <a href="#">Privacy Policy</a> |
+              <a href="#">Copyright Information</a>
+          </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12" id="footer-disclaimer"><h6><span style="margin-right:4px;font-weight:bold;">Disclaimer:</span>This site is maintained by the World Food Programme's GIS Unit.</h6></div>
+      </div>
+    </div>
+</footer>
