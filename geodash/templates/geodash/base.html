@@ -21,8 +21,13 @@
     {% endblock %}
     <link href="{{ STATIC_URL }}geodash/lib/typeahead.js-bootstrap-css/typeaheadjs.css" rel="stylesheet"/>
     <link href="{{ STATIC_URL}}geodash/lib/c3/{{ GEODASH_STATIC_DEPS.c3.version }}/c3.min.css" rel="stylesheet"/>
+    <!-- OpenLayers 3 CSS -->
+    <link rel="stylesheet" href="{{ STATIC_URL}}geodash/lib/ol3/3.17.1/ol.css" type="text/css" media="all" />
+    <style>.ol-control button { width: 2em; height: 2em; }</style>
+    <!-- Leaflet CSS
     <link rel="stylesheet" href="{{ STATIC_URL}}geodash/lib/leaflet/1.0.0-b1/leaflet.css" type="text/css" media="all" />
     <link rel="stylesheet" href="{{ STATIC_URL}}geodash/lib/Leaflet.label/leaflet-master/leaflet.label.css" type="text/css" media="all" />
+    -->
     <link href="{{ STATIC_URL}}geodash/lib/font-awesome/{{ GEODASH_STATIC_DEPS.fontawesome.version }}/css/font-awesome.min.css" rel="stylesheet"/>
     {% if GEODASH_STATIC_MONOLITH_CSS %}
     <!-- CSS / Monolith -->

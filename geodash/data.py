@@ -113,7 +113,7 @@ def assertBranch(obj, keys):
 
 
 def insertIntoObject(obj, keys, value):
-    print "Keys: ", keys
+    # print "Keys: ", keys
     keys = [unicode(k) for k in keys]
     obj = assertBranch(obj, keys)
     numberOfKeys = len(keys)
