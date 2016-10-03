@@ -23,6 +23,9 @@ slug: ""
 {% block pages %}
 pages: []
 {% endblock %}
+{% block assets %}
+assets: []
+{% endblock %}
 {% block view %}
 view:
   baselayer: "osm"
