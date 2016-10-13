@@ -112,13 +112,7 @@
     {% include "geodash/_includes/snippet_const.html" %}
     {% endblock %}
     {% block extra_head %}{% endblock %}
-    {% block init %}
-    <script type="text/javascript" language="Javascript">
-        $(function(){
-            init_main_app("mainApp","");
-        });
-    </script>
-    {% endblock %}
+    {% block init %}{% endblock %}
   </head>
   <body>{% block content %}{% block extra_content %}{% endblock %}{% endblock %}</body>
 </html>

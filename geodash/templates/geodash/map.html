@@ -2,14 +2,15 @@
 {% load geodash_tags %}
 {% block extra_head %}
   {% block map_config %}
-  <script type="text/javascript" language="Javascript">
-    geodash.map_config = {{ map_config_json|safe }};
-  </script>
+    {% if dashboards_json %}
+      <script type="text/javascript" language="Javascript">
+        geodash.dashboards = {{ dashboards_json | safe }};
+      </script>
+    {% endif %}
   {% endblock %}
   {% block initial_state %}
   <script type="text/javascript" language="Javascript">
-    geodash.initial_state = {{ state_json|safe }};
-    geodash.state_schema = {{ state_schema_json|safe }};
+    geodash.state_schema = {{ state_schema_json | safe }};
   </script>
   {% endblock %}
   {% block initial_data %}
@@ -17,17 +18,15 @@
       geodash.initial_data = {"data":{}};
   </script>
   {% endblock %}
+  {% block server_templates %}
+  <script type="text/javascript" language="Javascript">
+      geodash.templates.server = {{ server_templates | safe }};
+  </script>
+  {% endblock %}
 {% endblock %}
 
 {% block init %}
-<script type="text/javascript" language="Javascript">
-  $(function(){
-    geodash.{{ init_function | default_if_none:"init_explore" }}(
-      "mainApp",
-      $("#{{ geodash_main_id | default_if_none:'geodash-main' }}")
-    );
-  });
-</script>
+<script type="text/javascript" language="Javascript">$(function(){geodash.init.all();});</script>
 {% endblock %}
 
 {% block content %}
@@ -35,37 +34,13 @@
     {% block header %}{% endblock %}
     <div
       id="geodash-main"
-      class="row geodash-row geodash-main geodash-controller"
-      ng-controller="geodash-main"
-      geodash-controller="geodash-main">
-      {% block sidebar_left %}{% endblock %}
-      <div
-        id="geodash-map"
-        class="row geodash-row geodash-map geodash-controller{% if include_sidebar_left %} sidebar-open sidebar-left-open{% endif %}{% if include_sidebar_right %} sidebar-open sidebar-right-open{% endif %}"
-        ng-controller="geodash-map"
-        geodash-controller="geodash-map">
-        {% block map_controllers %}
-        {% include "geodash/_includes/map_legend.html" with legend_title="Legend - Click to Open" %}
-        {% include "geodash/_includes/map_overlays.html" %}
-        {% endblock %}
-        <div id="map"
-          class="geodash-controller geodash-map-map"
-          ng-controller="geodash-map-map"
-          geodash-controller="geodash-map-map">
-        </div>
-        <div id="geodash-popups" style="display:none;">
-        {% block popups %}
-        {% if GEODASH_MAPPING_LIBRARY == "ol3" %}<div id="popup"></div>{% endif %}
-        {% endblock %}
-        </div>
-      </div>
-      {% block sidebar_right %}{% endblock %}
-      <div id="geodash-modals">
-      {% block modals %}
-      {% include "geodash/_includes/modals/about.html" %}
-      {% include "geodash/_includes/modals/download.html" %}
-      {% endblock %}
-      </div>
+      data-geodash-dashboard-name="main"
+      data-geodash-controllers="GeoDashControllerMain"
+      {% if dashboard_url %}data-geodash-dashboard-config-url="{{ dashboard_url }}"{% endif %}
+      {% if state_url %}data-geodash-dashboard-initial-state-url="{{ state_url }}"{% endif %}
+      {% if dashboard_resources_json %}data-geodash-dashboard-resources="{{ dashboard_resources_json }}"{% endif %}
+      class="geodash-dashboard"
+      geodash-main>
     </div>
     {% block footer %}{% endblock %}
 </div>
