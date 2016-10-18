@@ -41,6 +41,12 @@
       {% if dashboard_resources_json %}data-geodash-dashboard-resources="{{ dashboard_resources_json }}"{% endif %}
       class="geodash-dashboard"
       geodash-main>
+      <div class="row" style="padding:10px;">
+        <div class="col-md-2"></div>
+        <div class="col-md-4"><a href="/"><h4>Back to Homepage</h4></a></div>
+        <div class="col-md-4"><a href="/"><i class="fa fa-arrow-right" style="font-size: 3rem;"></i></a></div>
+        <div class="col-md-2"></div>
+      </div>
     </div>
     {% block footer %}{% endblock %}
 </div>

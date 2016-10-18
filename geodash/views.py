@@ -16,7 +16,7 @@ except ImportError:
     import json
 
 from geodash.cache import provision_memcached_client
-
+from geodash.utils import extract, grep
 
 class geodash_data_view(View):
 
@@ -68,6 +68,12 @@ class geodash_data_view(View):
         else:
             print "Not caching data (settings.geodash_CACHE_DATA set to False)."
             data = self._build_data(request, *args, **kwargs)
+
+        data = grep(
+            data,
+            request.GET.get('root', None),
+            [{'path': k, 'value': v} for k, v in request.GET.iteritems() if k != "root"]
+        )
 
         content = json.dumps(data, default=jdefault)
         content = re.sub(
