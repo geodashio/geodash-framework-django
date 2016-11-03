@@ -9,9 +9,11 @@
     {% endif %}
   {% endblock %}
   {% block initial_state %}
-  <script type="text/javascript" language="Javascript">
-    geodash.state_schema = {{ state_schema_json | safe }};
-  </script>
+    {% if state_schema_json %}
+      <script type="text/javascript" language="Javascript">
+        geodash.state_schema = {{ state_schema_json | safe }};
+      </script>
+    {% endif %}
   {% endblock %}
   {% block initial_data %}
   <script type="text/javascript" language="Javascript">
@@ -19,9 +21,11 @@
   </script>
   {% endblock %}
   {% block server_templates %}
-  <script type="text/javascript" language="Javascript">
-      geodash.templates.server = {{ server_templates | safe }};
-  </script>
+    {% if server_templates %}
+      <script type="text/javascript" language="Javascript">
+          geodash.templates.server = {{ server_templates | safe }};
+      </script>
+    {% endif %}
   {% endblock %}
 {% endblock %}
 
@@ -38,6 +42,7 @@
       data-geodash-controllers="GeoDashControllerMain"
       {% if dashboard_url %}data-geodash-dashboard-config-url="{{ dashboard_url }}"{% endif %}
       {% if state_url %}data-geodash-dashboard-initial-state-url="{{ state_url }}"{% endif %}
+      {% if state_schema_url %}data-geodash-dashboard-state-schema-url="{{ state_schema_url }}"{% endif %}
       {% if dashboard_resources_json %}data-geodash-dashboard-resources="{{ dashboard_resources_json }}"{% endif %}
       class="geodash-dashboard"
       geodash-main>
