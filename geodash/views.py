@@ -2,6 +2,8 @@ import errno
 import re
 import yaml
 import binascii
+import cStringIO
+from csv import DictWriter
 
 from socket import error as socket_error
 
@@ -18,12 +20,54 @@ except ImportError:
 from geodash.cache import provision_memcached_client
 from geodash.utils import extract, grep
 
+class GeoDashDictWriter():
+
+    def __init__(self, output, fields, fallback=""):
+        self.output = output
+        self.fields = fields
+        self.fallback = fallback
+        self.delimiter = u","
+        self.quote = u'"'
+        self.newline = u"\n"
+
+    def writeheader(self):
+        self.output = self.output + self.delimiter.join([self.quote+x['label']+self.quote for x in self.fields]) + self.newline
+
+    def writerow(self, rowdict):
+        row = [extract(x['path'], rowdict, self.fallback) for x in self.fields]
+        #
+        row = [unicode(x) for x in row]
+        row = [x.replace('"','""') for x in row]
+        #
+        self.output = self.output + self.delimiter.join([self.quote+x+self.quote for x in row]) + self.newline
+
+    def writerows(self, rowdicts):
+        rows = []
+        for rowdict in rowdicts:
+            rows.append([extract(x['path'], rowdict, self.fallback) for x in self.fields])
+        for row in rows:
+            #
+            row = [unicode(x) for x in row]
+            row = [x.replace('"','""') for x in row]
+            #
+            self.output = self.output + self.delimiter.join([self.quote+x+self.quote for x in row]) + self.newline
+
+    def getvalue(self):
+        return self.output
+
+
 class geodash_data_view(View):
 
     key = None
 
+    def _build_root(self, request, *args, **kwargs):
+        return None
+
     def _build_key(self, request, *args, **kwargs):
         return self.key
+
+    def _build_columns(self, request, *args, **kwargs):
+        raise Exception('geodash_data_view._build_columns should be overwritten.  This API likely does not support CSV.')
 
     def _build_data(self):
         raise Exception('geodash_data_view._build_data should be overwritten')
@@ -87,6 +131,13 @@ class geodash_data_view(View):
         elif ext_lc == "yml" or ext_lc == "yaml":
             response = yaml.safe_dump(data, encoding="utf-8", allow_unicode=True, default_flow_style=False)
             return HttpResponse(response, content_type="text/plain")
+        elif ext_lc == "csv" or ext_lc == "csv":
+            columns = self._build_columns(request, *args, **kwargs)
+            writer = GeoDashDictWriter("", columns)
+            writer.writeheader()
+            writer.writerows(extract(self._build_root(request, *args, **kwargs), data, []))
+            response = writer.getvalue()
+            return HttpResponse(response, content_type="text/csv")
         elif ext_lc == "geodash":
             response = HttpResponse(content_type='application/octet-stream')
             # Need to do by bytes(bytearray(x)) to properly translate integers to 1 byte each

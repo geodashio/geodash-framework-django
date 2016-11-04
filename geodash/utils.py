@@ -22,7 +22,7 @@ def extract(keyChain, node, fallback):
                 index = int(keyChain[0]) if isinstance(keyChain[0], basestring) else keyChain[0]
                 obj = extract(newKeyChain, node[index], fallback)
             else:
-                obj = extract(newKeyChain, node[""+keyChain[0]], fallback)
+                obj = extract(newKeyChain, node.get(""+keyChain[0]), fallback)
     else:
         obj = fallback
 
