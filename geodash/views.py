@@ -18,7 +18,7 @@ except ImportError:
     import json
 
 from geodash.cache import provision_memcached_client
-from geodash.utils import extract, grep
+from geodash.utils import extract, grep, getRequestParameters
 
 class GeoDashDictWriter():
 
@@ -66,8 +66,9 @@ class geodash_data_view(View):
     def _build_key(self, request, *args, **kwargs):
         return self.key
 
-    def _build_columns(self, request, *args, **kwargs):
-        raise Exception('geodash_data_view._build_columns should be overwritten.  This API likely does not support CSV.')
+    def _build_attributes(self, request, *args, **kwargs):
+        #raise Exception('geodash_data_view._build_attributes should be overwritten.  This API likely does not support CSV.')
+        return None
 
     def _build_data(self):
         raise Exception('geodash_data_view._build_data should be overwritten')
@@ -113,18 +114,22 @@ class geodash_data_view(View):
             print "Not caching data (settings.geodash_CACHE_DATA set to False)."
             data = self._build_data(request, *args, **kwargs)
 
-        data = grep(
-            data,
-            request.GET.get('root', None),
-            [{'path': k, 'value': v} for k, v in request.GET.iteritems() if k != "root"]
-        )
+        #content = json.dumps(data, default=jdefault)
+        #content = re.sub(
+        #    settings.GEODASH_REGEX_CLIP_COORDS_PATTERN,
+        #    settings.GEODASH_REGEX_CLIP_COORDS_REPL,
+        #    content,
+        #    flags=re.IGNORECASE)
 
-        content = json.dumps(data, default=jdefault)
-        content = re.sub(
-            settings.GEODASH_REGEX_CLIP_COORDS_PATTERN,
-            settings.GEODASH_REGEX_CLIP_COORDS_REPL,
-            content,
-            flags=re.IGNORECASE)
+        root = self._build_root(request, *args, **kwargs)
+        attributes = self._build_attributes(request, *args, **kwargs)
+        if attributes:
+            data = grep(
+                obj=data,
+                root=root,
+                attributes=attributes,
+                filters=getRequestParameters(request, "grep", None)
+            )
 
         if ext_lc == "json":
             return HttpResponse(json.dumps(data, default=jdefault), content_type="application/json")
@@ -132,10 +137,9 @@ class geodash_data_view(View):
             response = yaml.safe_dump(data, encoding="utf-8", allow_unicode=True, default_flow_style=False)
             return HttpResponse(response, content_type="text/plain")
         elif ext_lc == "csv" or ext_lc == "csv":
-            columns = self._build_columns(request, *args, **kwargs)
-            writer = GeoDashDictWriter("", columns)
+            writer = GeoDashDictWriter("", attributes)
             writer.writeheader()
-            writer.writerows(extract(self._build_root(request, *args, **kwargs), data, []))
+            writer.writerows(extract(root, data, []))
             response = writer.getvalue()
             return HttpResponse(response, content_type="text/csv")
         elif ext_lc == "geodash":
