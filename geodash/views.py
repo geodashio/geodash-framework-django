@@ -1,9 +1,16 @@
+import binascii
 import errno
+import os
 import re
 import yaml
-import binascii
-import cStringIO
-from csv import DictWriter
+import StringIO
+import tempfile
+import shutil
+import zipfile
+
+from urlparse import urlparse
+#from csv import DictWriter
+from osgeo import ogr, osr
 
 from socket import error as socket_error
 
@@ -19,6 +26,12 @@ except ImportError:
 
 from geodash.cache import provision_memcached_client
 from geodash.utils import extract, grep, getRequestParameters
+from geodash.enumerations import ATTRIBUTE_TYPE_TO_OGR
+
+def parse_path(path):
+    basepath, filepath = os.path.split(path)
+    filename, ext = os.path.splitext(filepath)
+    return (basepath, filename, ext)
 
 class GeoDashDictWriter():
 
@@ -68,6 +81,12 @@ class geodash_data_view(View):
 
     def _build_attributes(self, request, *args, **kwargs):
         #raise Exception('geodash_data_view._build_attributes should be overwritten.  This API likely does not support CSV.')
+        return None
+
+    def _build_geometry(self, request, *args, **kwargs):
+        return None
+
+    def _build_geometry_type(self, request, *args, **kwargs):
         return None
 
     def _build_data(self):
@@ -142,6 +161,83 @@ class geodash_data_view(View):
             writer.writerows(extract(root, data, []))
             response = writer.getvalue()
             return HttpResponse(response, content_type="text/csv")
+        elif ext_lc == "zip":
+            # See the following for how to create zipfile in memory, mostly.
+            # https://newseasandbeyond.wordpress.com/2014/01/27/creating-in-memory-zip-file-with-python/
+            tempDirectory = tempfile.mkdtemp()
+            print "Temp Directory:", tempDirectory
+            if tempDirectory:
+                geometryType = self._build_geometry_type(request, *args, **kwargs)
+                ########### Create Files ###########
+                os.environ['SHAPE_ENCODING'] = "utf-8"
+                # See following for how to create shapefiles using OGR python bindings
+                # https://pcjericks.github.io/py-gdalogr-cookbook/vector_layers.html#filter-and-select-input-shapefile-to-new-output-shapefile-like-ogr2ogr-cli
+                basepath, out_filename, ext = parse_path(request.path)
+                out_shapefile = os.path.join(tempDirectory, out_filename+".shp" )
+                out_driver = ogr.GetDriverByName("ESRI Shapefile")
+                if os.path.exists(out_shapefile):
+                    out_driver.DeleteDataSource(out_shapefile)
+                out_datasource = out_driver.CreateDataSource(out_shapefile)
+                out_layer = out_datasource.CreateLayer(
+                    (out_filename+".shp").encode('utf-8'),
+                    geom_type=geometryType
+                )
+                ########### Create Fields ###########
+                out_layer.CreateField(ogr.FieldDefn("id", ogr.OFTInteger))  # Create ID Field
+                for attribute in attributes:
+                    label = attribute.get('label_shp') or attribute.get('label')
+                    out_layer.CreateField(ogr.FieldDefn(
+                        label,
+                        ATTRIBUTE_TYPE_TO_OGR.get(attribute.get('type', 'string'))
+                    ))
+                ########### Create Features ###########
+                features = extract(root, data, []);
+                for i in range(len(features)):
+                    feature = features[i]
+                    out_feature = ogr.Feature(out_layer.GetLayerDefn())
+                    geom = extract(self._build_geometry(request, *args, **kwargs), feature, None)
+                    out_feature.SetGeometry(ogr.CreateGeometryFromJson(json.dumps(geom, default=jdefault)))
+                    out_feature.SetField("id", i)
+                    for attribute in attributes:
+                        label = attribute.get('label_shp') or attribute.get('label')
+                        out_value = extract(attribute.get('path'), feature, None)
+                        out_feature.SetField(
+                            (attribute.get('label_shp') or attribute.get('label')),
+                            out_value.encode('utf-8') if isinstance(out_value, basestring) else out_value
+                        )
+                    out_layer.CreateFeature(out_feature)
+                out_datasource.Destroy()
+                ########### Create Projection ###########
+                spatialRef = osr.SpatialReference()
+                spatialRef.ImportFromEPSG(4326)
+                spatialRef.MorphToESRI()
+                with open(os.path.join(tempDirectory, out_filename+".prj"), 'w') as f:
+                    f.write(spatialRef.ExportToWkt())
+                    f.close()
+                ########### Create Zipfile ###########
+                buff = StringIO.StringIO()
+                zippedShapefile = zipfile.ZipFile(buff, mode='w')
+                #memoryFiles = []
+                component_filenames= os.listdir(tempDirectory);
+                #for i in range(len(componentFiles)):
+                #    memoryFiles.append(StringIO.StringIO())
+                for i in range(len(component_filenames)):
+                    with open(os.path.join(tempDirectory, component_filenames[i]), 'r') as f:
+                        contents = f.read()
+                        zippedShapefile.writestr(component_filenames[i], contents)
+                zippedShapefile.close()
+
+                print "zippedShapefile.printdir()", zippedShapefile.printdir()
+
+                ########### Delete Temporary Directory ###########
+                shutil.rmtree(tempDirectory)
+                ########### Response ###########
+                return HttpResponse(buff.getvalue(), content_type="application/zip")
+                #for i in range(len(componentFiles)):
+                #    with open(componentFiles[i], 'w') as componentFile:
+                #        memoryFiles[i].write(componentFile.read())
+            else:
+                raise Http404("Could not acquire temporary directory for building shapefile.")
         elif ext_lc == "geodash":
             response = HttpResponse(content_type='application/octet-stream')
             # Need to do by bytes(bytearray(x)) to properly translate integers to 1 byte each
