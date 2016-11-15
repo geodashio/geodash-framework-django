@@ -25,7 +25,7 @@ except ImportError:
     import json
 
 from geodash.cache import provision_memcached_client
-from geodash.utils import extract, grep, getRequestParameters
+from geodash.utils import extract, grep, reduceValue, getRequestParameter, getRequestParameters
 from geodash.enumerations import ATTRIBUTE_TYPE_TO_OGR
 
 def parse_path(path):
@@ -43,12 +43,19 @@ class GeoDashDictWriter():
         self.quote = u'"'
         self.newline = u"\n"
 
+    def _reduce(self, row, feature=None):
+        for i in range(len(self.fields)):
+            for r in extract('reduce', self.fields[i], []):
+                row[i] = reduceValue(r, row[i], feature=feature)
+        return row
+
     def writeheader(self):
         self.output = self.output + self.delimiter.join([self.quote+x['label']+self.quote for x in self.fields]) + self.newline
 
     def writerow(self, rowdict):
-        row = [extract(x['path'], rowdict, self.fallback) for x in self.fields]
+        row = [x.get('value', extract(x['path'], rowdict, self.fallback)) for x in self.fields]
         #
+        row = self._reduce(row, feature=rowdict)
         row = [unicode(x) for x in row]
         row = [x.replace('"','""') for x in row]
         #
@@ -57,12 +64,15 @@ class GeoDashDictWriter():
     def writerows(self, rowdicts):
         rows = []
         for rowdict in rowdicts:
-            rows.append([extract(x['path'], rowdict, self.fallback) for x in self.fields])
-        for row in rows:
+            row = [x.get('value', extract(x['path'], rowdict, self.fallback)) for x in self.fields]
             #
+            row = self._reduce(row, feature=rowdict)
             row = [unicode(x) for x in row]
             row = [x.replace('"','""') for x in row]
             #
+            rows.append(row)
+
+        for row in rows:
             self.output = self.output + self.delimiter.join([self.quote+x+self.quote for x in row]) + self.newline
 
     def getvalue(self):
@@ -87,6 +97,12 @@ class geodash_data_view(View):
         return None
 
     def _build_geometry_type(self, request, *args, **kwargs):
+        return None
+
+    def _build_grep_post_attributes(self, request, *args, **kwargs):
+        return None
+
+    def _build_grep_post_filters(self, request, *args, **kwargs):
         return None
 
     def _build_data(self):
@@ -192,20 +208,43 @@ class geodash_data_view(View):
                     ))
                 ########### Create Features ###########
                 features = extract(root, data, []);
+                features_baked = []
                 for i in range(len(features)):
                     feature = features[i]
-                    out_feature = ogr.Feature(out_layer.GetLayerDefn())
-                    geom = extract(self._build_geometry(request, *args, **kwargs), feature, None)
-                    out_feature.SetGeometry(ogr.CreateGeometryFromJson(json.dumps(geom, default=jdefault)))
-                    out_feature.SetField("id", i)
+                    feature_baked = {
+                        "properties": {},
+                        "geometry": extract(self._build_geometry(request, *args, **kwargs), feature, None)
+                    }
+                    #
                     for attribute in attributes:
-                        label = attribute.get('label_shp') or attribute.get('label')
-                        out_value = extract(attribute.get('path'), feature, None)
-                        out_feature.SetField(
-                            (attribute.get('label_shp') or attribute.get('label')),
-                            out_value.encode('utf-8') if isinstance(out_value, basestring) else out_value
+                        out_value = attribute.get('value', extract(attribute.get('path'), feature, None))
+                        for r in extract('reduce', attribute, []):
+                            out_value = reduceValue(r, out_value, feature=feature)
+                        feature_baked['properties'][attribute.get('label_shp') or attribute.get('label')] = out_value
+                    #
+                    features_baked.append(feature_baked)
+
+                grep_post_filters = self._build_grep_post_filters(request, *args, **kwargs)
+                if grep_post_filters:
+                    features_baked = grep(
+                        obj=features_baked,
+                        root=None,
+                        attributes=self._build_grep_post_attributes(request, *args, **kwargs),
+                        filters=grep_post_filters
+                    )
+
+                for i in range(len(features_baked)):
+                    feature_baked = features_baked[i]
+                    outFeature = ogr.Feature(out_layer.GetLayerDefn())
+                    outFeature.SetGeometry(ogr.CreateGeometryFromJson(json.dumps(feature_baked['geometry'], default=jdefault)))
+                    outFeature.SetField("id", i)
+                    for attributeName, attributeValue in feature_baked['properties'].iteritems():
+                        outFeature.SetField(
+                            attributeName,
+                            attributeValue.encode('utf-8') if isinstance(attributeValue, basestring) else attributeValue
                         )
-                    out_layer.CreateFeature(out_feature)
+                    out_layer.CreateFeature(outFeature)
+
                 out_datasource.Destroy()
                 ########### Create Projection ###########
                 spatialRef = osr.SpatialReference()
