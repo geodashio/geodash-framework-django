@@ -28,10 +28,12 @@ from geodash.cache import provision_memcached_client
 from geodash.utils import extract, grep, reduceValue, getRequestParameter, getRequestParameters
 from geodash.enumerations import ATTRIBUTE_TYPE_TO_OGR
 
+
 def parse_path(path):
     basepath, filepath = os.path.split(path)
     filename, ext = os.path.splitext(filepath)
     return (basepath, filename, ext)
+
 
 class GeoDashDictWriter():
 
@@ -49,11 +51,17 @@ class GeoDashDictWriter():
                 row[i] = reduceValue(r, row[i], feature=feature)
         return row
 
+    def _process_attr(self, attr, obj):
+        if 'value' in attr:
+            return attr.get('value')
+        else:
+            return extract(attr.get('path'), obj, self.fallback)
+
     def writeheader(self):
         self.output = self.output + self.delimiter.join([self.quote+x['label']+self.quote for x in self.fields]) + self.newline
 
     def writerow(self, rowdict):
-        row = [x.get('value', extract(x['path'], rowdict, self.fallback)) for x in self.fields]
+        row = [self._process_attr(x, rowdict) for x in self.fields]
         #
         row = self._reduce(row, feature=rowdict)
         row = [unicode(x) for x in row]
@@ -64,7 +72,7 @@ class GeoDashDictWriter():
     def writerows(self, rowdicts):
         rows = []
         for rowdict in rowdicts:
-            row = [x.get('value', extract(x['path'], rowdict, self.fallback)) for x in self.fields]
+            row = [self._process_attr(x, rowdict) for x in self.fields]
             #
             row = self._reduce(row, feature=rowdict)
             row = [unicode(x) for x in row]
