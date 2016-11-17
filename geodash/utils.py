@@ -262,3 +262,89 @@ def reduceValue(r, value, feature=None):
     #    print subrow
     #print ""
     #row[i] = sum([extract(r['path'], x, 0) for x in subrows])
+
+
+class GeoDashMetadataWriter():
+
+    def __init__(self, output, dataset, fallback=""):
+        self.output = output
+        self.dataset = dataset
+        self.fallback = fallback
+        self.quote = u'"'
+        self.newline = u"\n"
+
+    def write_line(self, line):
+        self.output.write(line+"\n")
+
+    def write_lines(self, lines):
+        if lines:
+            for line in lines:
+                self.output.write(line+"\n")
+
+    def write_newlines(self, lines=1):
+        for i in range(lines):
+            self.output.write("\n")
+
+    def write_break(self, newline=False, character="-", count=28):
+        self.write_line("".join([character for i in range(count)]))
+        if newline:
+            self.write_line("");
+
+    def write_attributes(self):
+        for attribute in self.dataset['attributes']:
+            self.write_line(attribute.get('label')+" | "+attribute.get('type', 'string'))
+            self.write_line(attribute.get('description', 'No description given.'))
+            self.write_newlines(1)
+            self.write_break()
+
+
+class GeoDashDictWriter():
+
+    def __init__(self, output, dataset, fallback=""):
+        self.output = output
+        self.dataset = dataset
+        self.fallback = fallback
+        self.delimiter = u","
+        self.quote = u'"'
+        self.newline = u"\n"
+
+    def _reduce(self, row, feature=None):
+        for i in range(len(self.dataset['attributes'])):
+            for r in extract('reduce', self.dataset['attributes'][i], []):
+                row[i] = reduceValue(r, row[i], feature=feature)
+        return row
+
+    def _process_attr(self, attr, obj):
+        if 'value' in attr:
+            return attr.get('value')
+        else:
+            return extract(attr.get('path'), obj, self.fallback)
+
+    def writeheader(self):
+        self.output = self.output + self.delimiter.join([self.quote+x['label']+self.quote for x in self.dataset['attributes']]) + self.newline
+
+    def writerow(self, rowdict):
+        row = [self._process_attr(x, rowdict) for x in self.dataset['attributes']]
+        #
+        row = self._reduce(row, feature=rowdict)
+        row = [unicode(x) for x in row]
+        row = [x.replace('"','""') for x in row]
+        #
+        self.output = self.output + self.delimiter.join([self.quote+x+self.quote for x in row]) + self.newline
+
+    def writerows(self, rowdicts):
+        rows = []
+        for rowdict in rowdicts:
+            row = [self._process_attr(x, rowdict) for x in self.dataset['attributes']]
+            #
+            row = self._reduce(row, feature=rowdict)
+            row = [unicode(x) for x in row]
+            row = [x.replace('"','""') for x in row]
+            #
+            rows.append(row)
+
+        for row in rows:
+            self.output = self.output + self.delimiter.join([self.quote+x+self.quote for x in row]) + self.newline
+
+    def getvalue(self):
+        return self.output

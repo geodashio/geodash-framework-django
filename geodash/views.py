@@ -25,7 +25,7 @@ except ImportError:
     import json
 
 from geodash.cache import provision_memcached_client
-from geodash.utils import extract, grep, reduceValue, getRequestParameter, getRequestParameters
+from geodash.utils import extract, grep, reduceValue, getRequestParameter, getRequestParameters, GeoDashMetadataWriter, GeoDashDictWriter
 from geodash.enumerations import ATTRIBUTE_TYPE_TO_OGR
 
 
@@ -33,58 +33,6 @@ def parse_path(path):
     basepath, filepath = os.path.split(path)
     filename, ext = os.path.splitext(filepath)
     return (basepath, filename, ext)
-
-
-class GeoDashDictWriter():
-
-    def __init__(self, output, fields, fallback=""):
-        self.output = output
-        self.fields = fields
-        self.fallback = fallback
-        self.delimiter = u","
-        self.quote = u'"'
-        self.newline = u"\n"
-
-    def _reduce(self, row, feature=None):
-        for i in range(len(self.fields)):
-            for r in extract('reduce', self.fields[i], []):
-                row[i] = reduceValue(r, row[i], feature=feature)
-        return row
-
-    def _process_attr(self, attr, obj):
-        if 'value' in attr:
-            return attr.get('value')
-        else:
-            return extract(attr.get('path'), obj, self.fallback)
-
-    def writeheader(self):
-        self.output = self.output + self.delimiter.join([self.quote+x['label']+self.quote for x in self.fields]) + self.newline
-
-    def writerow(self, rowdict):
-        row = [self._process_attr(x, rowdict) for x in self.fields]
-        #
-        row = self._reduce(row, feature=rowdict)
-        row = [unicode(x) for x in row]
-        row = [x.replace('"','""') for x in row]
-        #
-        self.output = self.output + self.delimiter.join([self.quote+x+self.quote for x in row]) + self.newline
-
-    def writerows(self, rowdicts):
-        rows = []
-        for rowdict in rowdicts:
-            row = [self._process_attr(x, rowdict) for x in self.fields]
-            #
-            row = self._reduce(row, feature=rowdict)
-            row = [unicode(x) for x in row]
-            row = [x.replace('"','""') for x in row]
-            #
-            rows.append(row)
-
-        for row in rows:
-            self.output = self.output + self.delimiter.join([self.quote+x+self.quote for x in row]) + self.newline
-
-    def getvalue(self):
-        return self.output
 
 
 class geodash_data_view(View):
@@ -97,7 +45,7 @@ class geodash_data_view(View):
     def _build_key(self, request, *args, **kwargs):
         return self.key
 
-    def _build_attributes(self, request, *args, **kwargs):
+    def _build_dataset(self, request, *args, **kwargs):
         #raise Exception('geodash_data_view._build_attributes should be overwritten.  This API likely does not support CSV.')
         return None
 
@@ -165,12 +113,12 @@ class geodash_data_view(View):
         #    flags=re.IGNORECASE)
 
         root = self._build_root(request, *args, **kwargs)
-        attributes = self._build_attributes(request, *args, **kwargs)
-        if attributes:
+        ds = self._build_dataset(request, *args, **kwargs)
+        if extract("attributes", ds, None):
             data = grep(
                 obj=data,
                 root=root,
-                attributes=attributes,
+                attributes=ds['attributes'],
                 filters=getRequestParameters(request, "grep", None)
             )
 
@@ -180,7 +128,7 @@ class geodash_data_view(View):
             response = yaml.safe_dump(data, encoding="utf-8", allow_unicode=True, default_flow_style=False)
             return HttpResponse(response, content_type="text/plain")
         elif ext_lc == "csv" or ext_lc == "csv":
-            writer = GeoDashDictWriter("", attributes)
+            writer = GeoDashDictWriter("", ds)
             writer.writeheader()
             writer.writerows(extract(root, data, []))
             response = writer.getvalue()
@@ -208,7 +156,7 @@ class geodash_data_view(View):
                 )
                 ########### Create Fields ###########
                 out_layer.CreateField(ogr.FieldDefn("id", ogr.OFTInteger))  # Create ID Field
-                for attribute in attributes:
+                for attribute in ds['attributes']:
                     label = attribute.get('label_shp') or attribute.get('label')
                     out_layer.CreateField(ogr.FieldDefn(
                         label,
@@ -224,7 +172,7 @@ class geodash_data_view(View):
                         "geometry": extract(self._build_geometry(request, *args, **kwargs), feature, None)
                     }
                     #
-                    for attribute in attributes:
+                    for attribute in ds['attributes']:
                         out_value = attribute.get('value', extract(attribute.get('path'), feature, None))
                         for r in extract('reduce', attribute, []):
                             out_value = reduceValue(r, out_value, feature=feature)
@@ -261,6 +209,21 @@ class geodash_data_view(View):
                 with open(os.path.join(tempDirectory, out_filename+".prj"), 'w') as f:
                     f.write(spatialRef.ExportToWkt())
                     f.close()
+                ########### Create Metadata File ###########
+                with open(os.path.join(tempDirectory, out_filename+".txt"), 'w') as f:
+                    m = GeoDashMetadataWriter(f, ds)
+                    m.write_line("General:  "+ds['name'])
+                    m.write_line("Date:  ")
+                    m.write_line("URL:  "+settings.SITEURL[:-1]+request.get_full_path())
+                    m.write_newlines(1);
+                    m.write_break(newline=False, character="=", count=28)
+                    m.write_line("Filters (Grep)")
+                    m.write_break()
+                    m.write_lines(getRequestParameters(request, "grep", None))
+                    m.write_break(newline=False, character="=", count=28)
+                    m.write_line("Attributes")
+                    m.write_break()
+                    m.write_attributes()
                 ########### Create Zipfile ###########
                 buff = StringIO.StringIO()
                 zippedShapefile = zipfile.ZipFile(buff, mode='w')
