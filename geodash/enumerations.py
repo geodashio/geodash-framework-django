@@ -14,3 +14,8 @@ ATTRIBUTE_TYPE_TO_OGR = {
     "float": ogr.OFTReal,
     "string": ogr.OFTString
 }
+
+GEOMETRY_TYPE_TO_OGR = {
+    "point": ogr.wkbPoint,
+    "multipolygon": ogr.wkbMultiPolygon
+}

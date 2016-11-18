@@ -26,7 +26,7 @@ except ImportError:
 
 from geodash.cache import provision_memcached_client
 from geodash.utils import extract, grep, reduceValue, getRequestParameter, getRequestParameters, GeoDashMetadataWriter, GeoDashDictWriter
-from geodash.enumerations import ATTRIBUTE_TYPE_TO_OGR
+from geodash.enumerations import ATTRIBUTE_TYPE_TO_OGR, GEOMETRY_TYPE_TO_OGR
 
 
 def parse_path(path):
@@ -37,19 +37,20 @@ def parse_path(path):
 
 class geodash_data_view(View):
 
-    key = None
+    def _cache(self, request, *args, **kwargs):
+        return True
 
     def _build_root(self, request, *args, **kwargs):
         return None
 
     def _build_key(self, request, *args, **kwargs):
-        return self.key
+        return None
 
     def _build_dataset(self, request, *args, **kwargs):
         #raise Exception('geodash_data_view._build_attributes should be overwritten.  This API likely does not support CSV.')
         return None
 
-    def _build_geometry(self, request, *args, **kwargs):
+    def _build_geometry_path(self, request, *args, **kwargs):
         return None
 
     def _build_geometry_type(self, request, *args, **kwargs):
@@ -61,41 +62,42 @@ class geodash_data_view(View):
     def _build_grep_post_filters(self, request, *args, **kwargs):
         return None
 
-    def _build_data(self):
+    def _build_data(self, request, *args, **kwargs):
         raise Exception('geodash_data_view._build_data should be overwritten')
 
     def get(self, request, *args, **kwargs):
         ext_lc = kwargs['extension'].lower();
         ##
         data = None
-        if settings.GEODASH_CACHE_DATA:
+        if settings.GEODASH_CACHE_DATA and self._cache(request, *args, **kwargs):
             client = provision_memcached_client()
             if client:
-                key = self._build_key(request, *args, **kwargs)
-                print "Checking cache with key ", key
-
                 data = None
-                try:
-                    data = client.get(key)
-                except socket_error as serr:
-                    data = None
-                    print "Error getting data from in-memory cache."
-                    if serr.errno == errno.ECONNREFUSED:
-                        print "Memcached is likely not running.  Start memcached with supervisord."
-                    raise serr
+                key = self._build_key(request, *args, **kwargs)
+                if key:
+                    print "Checking cache with key ", key
+                    try:
+                        data = client.get(key)
+                    except socket_error as serr:
+                        data = None
+                        print "Error getting data from in-memory cache."
+                        if serr.errno == errno.ECONNREFUSED:
+                            print "Memcached is likely not running.  Start memcached with supervisord."
+                        raise serr
 
                 if not data:
                     print "Data not found in cache."
                     data = self._build_data(request, *args, **kwargs)
                     if ext_lc == "geodash":
                         data = [int(x) for x in data]
-                    try:
-                        client.set(key, data)
-                    except socket_error as serr:
-                        print "Error saving data to in-memory cache."
-                        if serr.errno == errno.ECONNREFUSED:
-                            print "Memcached is likely not running or the data exceeds memcached item size limit.  Start memcached with supervisord."
-                        raise serr
+                    if key:
+                        try:
+                            client.set(key, data)
+                        except socket_error as serr:
+                            print "Error saving data to in-memory cache."
+                            if serr.errno == errno.ECONNREFUSED:
+                                print "Memcached is likely not running or the data exceeds memcached item size limit.  Start memcached with supervisord."
+                            raise serr
                 else:
                     print "Data found in cache."
             else:
@@ -159,7 +161,7 @@ class geodash_data_view(View):
                 for attribute in ds['attributes']:
                     label = attribute.get('label_shp') or attribute.get('label')
                     out_layer.CreateField(ogr.FieldDefn(
-                        label,
+                        str(label),
                         ATTRIBUTE_TYPE_TO_OGR.get(attribute.get('type', 'string'))
                     ))
                 ########### Create Features ###########
@@ -169,7 +171,7 @@ class geodash_data_view(View):
                     feature = features[i]
                     feature_baked = {
                         "properties": {},
-                        "geometry": extract(self._build_geometry(request, *args, **kwargs), feature, None)
+                        "geometry": extract(self._build_geometry_path(request, *args, **kwargs), feature, None)
                     }
                     #
                     for attribute in ds['attributes']:
@@ -196,7 +198,7 @@ class geodash_data_view(View):
                     outFeature.SetField("id", i)
                     for attributeName, attributeValue in feature_baked['properties'].iteritems():
                         outFeature.SetField(
-                            attributeName,
+                            attributeName.encode('utf-8'),
                             attributeValue.encode('utf-8') if isinstance(attributeValue, basestring) else attributeValue
                         )
                     out_layer.CreateFeature(outFeature)
