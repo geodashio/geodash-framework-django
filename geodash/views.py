@@ -214,18 +214,19 @@ class geodash_data_view(View):
                 ########### Create Metadata File ###########
                 with open(os.path.join(tempDirectory, out_filename+".txt"), 'w') as f:
                     m = GeoDashMetadataWriter(f, ds)
-                    m.write_line("General:  "+ds['name'])
-                    m.write_line("Date:  ")
+                    m.write_line("General")
+                    m.write_break()
+                    m.write_line("Title:  "+kwargs.get("title", "Population at Risk"))
                     m.write_line("URL:  "+settings.SITEURL[:-1]+request.get_full_path())
                     m.write_newlines(1);
                     m.write_break(newline=False, character="=", count=28)
                     m.write_line("Filters (Grep)")
                     m.write_break()
-                    m.write_lines(getRequestParameters(request, "grep", None))
+                    m.write_filters(grep=getRequestParameters(request, "grep", None), label="label_shp")
                     m.write_break(newline=False, character="=", count=28)
                     m.write_line("Attributes")
                     m.write_break()
-                    m.write_attributes()
+                    m.write_attributes(label="label_shp")
                 ########### Create Zipfile ###########
                 buff = StringIO.StringIO()
                 zippedShapefile = zipfile.ZipFile(buff, mode='w')

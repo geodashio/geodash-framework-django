@@ -273,6 +273,13 @@ class GeoDashMetadataWriter():
         self.quote = u'"'
         self.newline = u"\n"
 
+    def _get_attr_for_path(self, path):
+        matches = [x for x in self.dataset['attributes'] if path == x.get('path')]
+        if len(matches) == 1:
+            return matches[0]
+        else:
+            return None
+
     def write_line(self, line):
         self.output.write(line+"\n")
 
@@ -290,9 +297,18 @@ class GeoDashMetadataWriter():
         if newline:
             self.write_line("");
 
-    def write_attributes(self):
+    def write_filters(self, grep=None, label=None):
+        for f in grep:
+            f2 = parseFilter(f)
+            attr = self._get_attr_for_path(f2['path'])
+            if f2['operand'] == "between" or f2['operand'] == "btwn":
+                self.write_line(attr.get(label or 'label')+" : "+f2['min']+" - "+f2['max'])
+            else:
+                self.write_line(attr.get(label or 'label')+" : "+f2['value'])
+
+    def write_attributes(self, label=None):
         for attribute in self.dataset['attributes']:
-            self.write_line(attribute.get('label')+" | "+attribute.get('type', 'string'))
+            self.write_line(attribute.get(label or 'label')+" | "+attribute.get('type', 'string'))
             self.write_line(attribute.get('description', 'No description given.'))
             self.write_newlines(1)
             self.write_break()
